@@ -3,4 +3,8 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="search_toolbar_background">#B0BEC5</color>
+    <color name="search_statusbar_background">#90A4AE</color>
+    <color name="search_toolbar_title">#FFFFFF</color>
 </resources>

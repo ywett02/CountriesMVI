@@ -3,4 +3,6 @@
     <string name="cd_flag">Country flag</string>
     <string name="lbl_empty_countries">No countries</string>
     <string name="hint_search_country">Search a country</string>
+    <string name="action_search">Search</string>
+    <string name="search_hint">Search country</string>
 </resources>

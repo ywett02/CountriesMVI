@@ -1,14 +1,16 @@
-package com.jurcikova.ivet.triptodomvi.ui.countryList
+package com.jurcikova.ivet.triptodomvi.ui.countryList.all
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.LiveDataReactiveStreams
 import android.arch.lifecycle.ViewModel
 import com.jurcikova.ivet.triptodomvi.business.interactor.CountryListInteractor
 import com.jurcikova.ivet.triptodomvi.common.notOfType
 import com.jurcikova.ivet.triptodomvi.mvibase.MviViewModel
-import com.jurcikova.ivet.triptodomvi.ui.countryList.CountryListAction.LoadCountriesAction
-import com.jurcikova.ivet.triptodomvi.ui.countryList.CountryListIntent.InitialIntent
-import com.jurcikova.ivet.triptodomvi.ui.countryList.CountryListIntent.SearchIntent
-import com.jurcikova.ivet.triptodomvi.ui.countryList.CountryListResult.LoadCountriesResult
+import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListAction.LoadCountriesAction
+import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListIntent.InitialIntent
+import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListResult.LoadCountriesResult
 import com.strv.ktools.inject
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
@@ -38,15 +40,6 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
                 is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is LoadCountriesResult.InProgress -> previousState.copy(isLoading = true)
             }
-            is CountryListResult.LoadCountriesByNameResult.Success -> {
-                previousState.copy(
-                        isLoading = false,
-                        error = null,
-                        countries = result.countries
-                )
-            }
-            is CountryListResult.LoadCountriesByNameResult.Failure -> previousState.copy(isLoading = false, error = result.error)
-            is CountryListResult.LoadCountriesByNameResult.InProgress -> previousState.copy(isLoading = true, searchQuery = result.searchQuery)
         }
     }
 
@@ -93,7 +86,8 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
             }
         }
 
-    override fun states(): Observable<CountryListViewState> = statesObservable
+    override fun states(): LiveData<CountryListViewState> =
+            LiveDataReactiveStreams.fromPublisher(statesObservable.toFlowable(BackpressureStrategy.BUFFER))
 
     override fun processIntents(intents: Observable<CountryListIntent>) {
         intents.subscribe(intentsSubject)
@@ -106,10 +100,6 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
     private fun actionFromIntent(intent: CountryListIntent): CountryListAction {
         return when (intent) {
             is InitialIntent -> LoadCountriesAction
-            is SearchIntent -> {
-                if (intent.searchQuery.isEmpty()) LoadCountriesAction
-                else CountryListAction.LoadCountriesByNameAction(intent.searchQuery)
-            }
         }
     }
 }

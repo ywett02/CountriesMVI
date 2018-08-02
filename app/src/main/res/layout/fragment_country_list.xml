@@ -5,15 +5,15 @@
 
         <variable
             name="model"
-            type="com.jurcikova.ivet.triptodomvi.ui.countryList.CountryListViewState" />
-
+            type="com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListViewState" />
     </data>
 
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingTop="?attr/actionBarSize">
 
         <ProgressBar
             android:id="@+id/progress"
@@ -22,7 +22,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ed_search"
+            app:layout_constraintTop_toTopOf="parent"
             app:show="@{model.isLoading}" />
 
         <TextView
@@ -34,20 +34,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ed_search"
+            app:layout_constraintTop_toTopOf="parent"
             app:show="@{!model.isLoading &amp;&amp; model.countries.isEmpty()}" />
-
-        <EditText
-            android:id="@+id/ed_search"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/space_16"
-            android:layout_marginTop="@dimen/space_16"
-            android:layout_marginEnd="@dimen/space_16"
-            android:hint="@string/hint_search_country"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_countries"
@@ -58,7 +46,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ed_search"
+            app:layout_constraintTop_toTopOf="parent"
             app:list="@{model.countries}"
             tools:listitem="@layout/item_country" />
 

@@ -4,6 +4,7 @@ import android.app.Application
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import com.jurcikova.ivet.triptodomvi.business.api.CountryApi
 import com.jurcikova.ivet.triptodomvi.business.interactor.CountryListInteractor
+import com.jurcikova.ivet.triptodomvi.business.interactor.CountrySearchInteractor
 import com.jurcikova.ivet.triptodomvi.business.repository.CountryRepository
 import com.jurcikova.ivet.triptodomvi.business.repository.CountryRepositoryImpl
 import com.jurcikova.ivet.triptodomvi.ui.countryList.CountryAdapter
@@ -52,9 +53,8 @@ class AppModule(private val application: Application) : DIModule() {
     }
 
     private fun onProvideInteractors() {
-        provideSingleton<CountryListInteractor> {
-            CountryListInteractor()
-        }
+        provideSingleton { CountryListInteractor() }
+        provideSingleton { CountrySearchInteractor() }
     }
 
     private fun onProvideAdapters() {
@@ -69,7 +69,6 @@ class AppModule(private val application: Application) : DIModule() {
 
     private fun onProvideApi() {
         provideSingleton<CountryApi> { retrofit.create(CountryApi::class.java) }
-
     }
 }
 
