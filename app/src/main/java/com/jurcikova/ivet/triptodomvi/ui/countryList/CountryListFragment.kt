@@ -3,27 +3,30 @@ package com.jurcikova.ivet.triptodomvi.ui.countryList
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import com.jakewharton.rxbinding2.widget.RxTextView
 import com.jurcikova.ivet.triptodomvi.R
-import com.jurcikova.ivet.triptodomvi.common.BindActivity
-import com.jurcikova.ivet.triptodomvi.databinding.ActivityCountryListBinding
+import com.jurcikova.ivet.triptodomvi.common.BindFragment
+import com.jurcikova.ivet.triptodomvi.databinding.FragmentCountryListBinding
 import com.jurcikova.ivet.triptodomvi.mvibase.MviIntent
 import com.jurcikova.ivet.triptodomvi.mvibase.MviView
 import com.strv.ktools.inject
 import io.reactivex.Observable
 import java.util.concurrent.TimeUnit
 
-class CountryListActivity : AppCompatActivity(), MviView<CountryListIntent, CountryListViewState> {
+class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListViewState> {
 
     private val viewModel: CountryListViewModel by lazy(LazyThreadSafetyMode.NONE) {
         ViewModelProviders.of(this).get(CountryListViewModel::class.java)
     }
 
     //delegate the binding initialization to BindFragment delegate
-    private val binding: ActivityCountryListBinding by BindActivity(R.layout.activity_country_list)
+    private val binding: FragmentCountryListBinding by BindFragment(R.layout.fragment_country_list)
 
     private val adapter by inject<CountryAdapter>()
 
@@ -46,13 +49,22 @@ class CountryListActivity : AppCompatActivity(), MviView<CountryListIntent, Coun
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_country_list)
 
         viewModel.states().observe(this, Observer {
             render(it!!)
         })
+    }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? = binding.root
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         setupListView()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         startStream()
     }
 
@@ -79,11 +91,13 @@ class CountryListActivity : AppCompatActivity(), MviView<CountryListIntent, Coun
     }
 
     private fun setupListView() {
-        binding.rvCountries.layoutManager = LinearLayoutManager(this)
+        binding.rvCountries.layoutManager = LinearLayoutManager(activity)
         binding.rvCountries.adapter = adapter
     }
 
     private fun showErrorState(exception: Throwable) {
-        Toast.makeText(this, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
+        activity?.let {
+            Toast.makeText(it, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
     }
 }
