@@ -19,8 +19,10 @@ fun View.setShow(show: Boolean) {
 
 @Suppress("UNCHECKED_CAST")
 @BindingAdapter("list")
-fun <E> RecyclerView.setList(list: List<E>) {
-    (adapter as ListAdapter<E, *>?)?.submitList(list)
+fun <E> RecyclerView.setList(list: List<E>?) {
+    list?.let {
+        (adapter as ListAdapter<E, *>?)?.submitList(it)
+    }
 }
 
 @BindingAdapter("svg")

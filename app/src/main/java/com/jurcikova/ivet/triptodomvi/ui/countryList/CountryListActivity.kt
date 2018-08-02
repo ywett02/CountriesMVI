@@ -1,25 +1,22 @@
 package com.jurcikova.ivet.triptodomvi.ui.countryList
 
-import android.annotation.SuppressLint
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.widget.Toast
-import com.example.android.architecture.blueprints.todoapp.mvibase.MviViewState
 import com.jakewharton.rxbinding2.widget.RxTextView
 import com.jurcikova.ivet.triptodomvi.R
 import com.jurcikova.ivet.triptodomvi.common.BindActivity
 import com.jurcikova.ivet.triptodomvi.databinding.ActivityCountryListBinding
+import com.jurcikova.ivet.triptodomvi.mvibase.MviIntent
 import com.jurcikova.ivet.triptodomvi.mvibase.MviView
 import com.strv.ktools.inject
-import com.strv.ktools.logMe
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
 import java.util.concurrent.TimeUnit
 
 class CountryListActivity : AppCompatActivity(), MviView<CountryListIntent, CountryListViewState> {
-
 
     private val viewModel: CountryListViewModel by lazy(LazyThreadSafetyMode.NONE) {
         ViewModelProviders.of(this).get(CountryListViewModel::class.java)
@@ -27,9 +24,6 @@ class CountryListActivity : AppCompatActivity(), MviView<CountryListIntent, Coun
 
     //delegate the binding initialization to BindFragment delegate
     private val binding: ActivityCountryListBinding by BindActivity(R.layout.activity_country_list)
-
-    // Used to manage the data flow lifecycle and avoid memory leak.
-    private val disposables = CompositeDisposable()
 
     private val adapter by inject<CountryAdapter>()
 
@@ -39,6 +33,7 @@ class CountryListActivity : AppCompatActivity(), MviView<CountryListIntent, Coun
 
     private val searchIntent by lazy {
         RxTextView.textChanges(binding.edSearch)
+                //because after orientation change the passed value would be emitted
                 .skip(2)
                 .filter {
                     it.length > 2 || it.isEmpty()
@@ -53,22 +48,20 @@ class CountryListActivity : AppCompatActivity(), MviView<CountryListIntent, Coun
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_country_list)
 
-        bind()
+        viewModel.states().observe(this, Observer {
+            render(it!!)
+        })
+
+        setupListView()
+        startStream()
     }
 
     override fun render(state: CountryListViewState) {
-        state.logMe()
         binding.model = state
 
         if (state.error != null) {
             showErrorState(state.error)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        disposables.dispose()
     }
 
     override fun intents() =
@@ -78,16 +71,9 @@ class CountryListActivity : AppCompatActivity(), MviView<CountryListIntent, Coun
             )
 
     /**
-     * Connect the [MviView] with the [MviViewModel]
-     * We subscribe to the [MviViewModel] before passing it the [MviView]'s [MviIntent]s.
-     * If we were to pass [MviIntent]s to the [MviViewModel] before listening to it,
-     * emitted [MviViewState]s could be lost
+     *  Start the stream by passing [MviIntent] to [MviViewModel]
      */
-    @SuppressLint("RxSubscribeOnError")
-    private fun bind() {
-        setupListView()
-        // Subscribe to the ViewModel and call render for every emitted state
-        disposables.add(viewModel.states().subscribe(this::render))
+    private fun startStream() {
         // Pass the UI's intents to the ViewModel
         viewModel.processIntents(intents())
     }

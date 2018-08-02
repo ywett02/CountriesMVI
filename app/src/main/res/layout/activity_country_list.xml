@@ -6,7 +6,6 @@
         <variable
             name="model"
             type="com.jurcikova.ivet.triptodomvi.ui.countryList.CountryListViewState" />
-
     </data>
 
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
