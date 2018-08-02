@@ -2,18 +2,30 @@
 <layout>
 
     <data>
-
         <variable
             name="model"
-            type="com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListViewState" />
+            type="com.jurcikova.ivet.triptodomvi.ui.countryList.search.CountrySearchViewState" />
     </data>
+
 
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="?attr/actionBarSize">
+        android:layout_height="match_parent">
+
+        <SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/search_toolbar_background"
+            android:elevation="4dp"
+            android:iconifiedByDefault="false"
+            android:queryBackground="@android:color/transparent"
+            android:queryHint="@string/search_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ProgressBar
             android:id="@+id/progress"
@@ -22,7 +34,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/searchView"
             app:show="@{model.isLoading}" />
 
         <TextView
@@ -34,8 +46,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:show="@{!model.isLoading &amp;&amp; model.countries.isEmpty()}" />
+            app:layout_constraintTop_toBottomOf="@+id/searchView"
+            app:show="@{!model.isLoading &amp;&amp; model.countries.isEmpty() &amp;&amp; !model.searchNotStartedYet}" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_countries"
@@ -46,10 +58,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/searchView"
             app:list="@{model.countries}"
             tools:listitem="@layout/item_country" />
 
     </android.support.constraint.ConstraintLayout>
-
 </layout>

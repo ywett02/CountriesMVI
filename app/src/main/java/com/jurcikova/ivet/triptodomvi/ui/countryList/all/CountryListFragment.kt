@@ -1,4 +1,4 @@
-package com.jurcikova.ivet.triptodomvi.ui.countryList
+package com.jurcikova.ivet.triptodomvi.ui.countryList.all
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -9,15 +9,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.jakewharton.rxbinding2.widget.RxTextView
 import com.jurcikova.ivet.triptodomvi.R
 import com.jurcikova.ivet.triptodomvi.common.BindFragment
 import com.jurcikova.ivet.triptodomvi.databinding.FragmentCountryListBinding
 import com.jurcikova.ivet.triptodomvi.mvibase.MviIntent
 import com.jurcikova.ivet.triptodomvi.mvibase.MviView
+import com.jurcikova.ivet.triptodomvi.ui.countryList.CountryAdapter
 import com.strv.ktools.inject
 import io.reactivex.Observable
-import java.util.concurrent.TimeUnit
 
 class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListViewState> {
 
@@ -32,19 +31,6 @@ class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListVi
 
     private val initialIntent by lazy {
         Observable.just(CountryListIntent.InitialIntent)
-    }
-
-    private val searchIntent by lazy {
-        RxTextView.textChanges(binding.edSearch)
-                //because after orientation change the passed value would be emitted
-                .skip(2)
-                .filter {
-                    it.length > 2 || it.isEmpty()
-                }
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .map {
-                    CountryListIntent.SearchIntent(it.toString())
-                }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,11 +62,7 @@ class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListVi
         }
     }
 
-    override fun intents() =
-            Observable.merge(
-                    initialIntent,
-                    searchIntent
-            )
+    override fun intents() = initialIntent as Observable<CountryListIntent>
 
     /**
      *  Start the stream by passing [MviIntent] to [MviViewModel]

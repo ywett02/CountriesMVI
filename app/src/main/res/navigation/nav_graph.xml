@@ -1,10 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
     app:startDestination="@id/countryListFragment">
 
     <fragment
         android:id="@+id/countryListFragment"
-        android:name="com.jurcikova.ivet.triptodomvi.ui.countryList.CountryListFragment"
-        android:label="CountryListFragment" />
+        android:name="com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListFragment"
+        android:label="CountryListFragment" >
+        <action
+            android:id="@+id/action_countryListFragment_to_countrySearchFragment"
+            app:destination="@id/countrySearchFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/countrySearchFragment"
+        android:name="com.jurcikova.ivet.triptodomvi.ui.countryList.search.CountrySearchFragment"
+        android:label="CountrySearchFragment" />
 </navigation>
