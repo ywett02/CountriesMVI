@@ -37,18 +37,26 @@
             app:layout_constraintTop_toTopOf="parent"
             app:show="@{!model.isLoading &amp;&amp; model.countries.isEmpty()}" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_countries"
+        <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/swiperefresh"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:clipToPadding="false"
-            android:padding="@dimen/space_16"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:list="@{model.countries}"
-            tools:listitem="@layout/item_country" />
+            app:refreshing="@{model.isRefreshing}">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_countries"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:padding="@dimen/space_16"
+                app:list="@{model.countries}"
+                tools:listitem="@layout/item_country" />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
     </android.support.constraint.ConstraintLayout>
 

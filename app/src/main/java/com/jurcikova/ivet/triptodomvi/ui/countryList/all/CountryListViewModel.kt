@@ -8,6 +8,7 @@ import com.jurcikova.ivet.triptodomvi.common.notOfType
 import com.jurcikova.ivet.triptodomvi.mvibase.MviViewModel
 import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListIntent.InitialIntent
+import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListIntent.SwipeToRefresh
 import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListResult.LoadCountriesResult
 import com.strv.ktools.inject
 import com.strv.ktools.logD
@@ -34,12 +35,17 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
                 is LoadCountriesResult.Success -> {
                     previousState.copy(
                             isLoading = false,
+                            isRefreshing = false,
                             countries = result.countries
 
                     )
                 }
-                is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
-                is LoadCountriesResult.InProgress -> previousState.copy(isLoading = true)
+                is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, isRefreshing = false, error = result.error)
+                is LoadCountriesResult.InProgress -> {
+                    if (result.isRefreshing) {
+                        previousState.copy(isLoading = false, isRefreshing = true)
+                    } else previousState.copy(isLoading = true, isRefreshing = false)
+                }
             }
         }
     }
@@ -107,7 +113,8 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
      */
     private fun actionFromIntent(intent: CountryListIntent): CountryListAction {
         return when (intent) {
-            is InitialIntent -> LoadCountriesAction
+            is InitialIntent -> LoadCountriesAction(false)
+            is SwipeToRefresh -> LoadCountriesAction(true)
         }
     }
 }

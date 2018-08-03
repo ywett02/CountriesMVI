@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import com.jakewharton.rxbinding2.support.v4.widget.refreshes
 import com.jurcikova.ivet.triptodomvi.R
 import com.jurcikova.ivet.triptodomvi.common.BindFragment
 import com.jurcikova.ivet.triptodomvi.databinding.FragmentCountryListBinding
@@ -32,6 +33,13 @@ class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListVi
 
     private val initialIntent by lazy {
         Observable.just(CountryListIntent.InitialIntent)
+    }
+
+    private val swipeToRefreshIntent by lazy {
+        binding.swiperefresh.refreshes()
+                .map {
+                    CountryListIntent.SwipeToRefresh
+                }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +73,10 @@ class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListVi
         }
     }
 
-    override fun intents() = initialIntent as Observable<CountryListIntent>
+    override fun intents() = Observable.merge(
+            initialIntent,
+            swipeToRefreshIntent
+    )
 
     /**
      *  Start the stream by passing [MviIntent] to [MviViewModel]

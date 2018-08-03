@@ -7,6 +7,6 @@ sealed class CountryListResult : MviResult {
     sealed class LoadCountriesResult : CountryListResult() {
         data class Success(val countries: List<Country>) : LoadCountriesResult()
         data class Failure(val error: Throwable) : LoadCountriesResult()
-        object InProgress : LoadCountriesResult()
+        data class InProgress(val isRefreshing: Boolean) : LoadCountriesResult()
     }
 }

@@ -72,7 +72,7 @@ class CountryListInteractor() : MviInteractor<CountryListAction, CountryListResu
                             // doing work and waiting on a response.
                             // We emit it after observing on the UI thread to allow the event to be emitted
                             // on the current frame and avoid jank.
-                            .startWith(LoadCountriesResult.InProgress)
+                            .startWith(LoadCountriesResult.InProgress(action.isRefreshing))
                 }
             }
 }
