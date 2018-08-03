@@ -7,6 +7,7 @@ import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListAction.LoadC
 import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListResult
 import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListResult.LoadCountriesResult
 import com.strv.ktools.inject
+import com.strv.ktools.logD
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -35,6 +36,9 @@ class CountryListInteractor() : MviInteractor<CountryListAction, CountryListResu
             ObservableTransformer<CountryListAction, CountryListResult> { actions ->
                 actions.publish { selector ->
                     selector.ofType(LoadCountriesAction::class.java).compose(loadTasks)
+                            .doOnNext { result ->
+                                logD("result: $result")
+                            }
                             .mergeWith(
                                     // Error for not implemented actions
                                     selector.filter { v ->
@@ -47,7 +51,7 @@ class CountryListInteractor() : MviInteractor<CountryListAction, CountryListResu
                 }
             }
 
-    //todo blbne typovanie
+    //todo check types
     private val loadTasks =
             ObservableTransformer<LoadCountriesAction, CountryListResult> { actions ->
                 actions.flatMap { action ->
@@ -61,8 +65,7 @@ class CountryListInteractor() : MviInteractor<CountryListAction, CountryListResu
                             // Wrap any error into an immutable object and pass it down the stream
                             // without crashing.
                             // Because errors are data and hence, should just be part of the stream.
-                            //todo why there is a funcion? what does it do?
-                            .onErrorReturn(LoadCountriesResult::Failure)
+                            .onErrorReturn { LoadCountriesResult.Failure(it) }
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             // Emit an InProgress event to notify the subscribers (e.g. the UI) we are

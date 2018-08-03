@@ -17,6 +17,7 @@ import com.jurcikova.ivet.triptodomvi.mvibase.MviIntent
 import com.jurcikova.ivet.triptodomvi.mvibase.MviView
 import com.jurcikova.ivet.triptodomvi.ui.countryList.CountryAdapter
 import com.strv.ktools.inject
+import com.strv.ktools.logD
 import io.reactivex.Observable
 import java.util.concurrent.TimeUnit
 
@@ -41,14 +42,15 @@ class CountrySearchFragment : Fragment(), MviView<CountrySearchIntent, CountrySe
                 .debounce(500, TimeUnit.MILLISECONDS)
                 .map {
                     CountrySearchIntent.SearchIntent(it.toString())
-                }
+                }.cast(CountrySearchIntent::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.states().observe(this, Observer {
-            render(it!!)
+        viewModel.states().observe(this, Observer { state ->
+            logD("state: Search $state")
+            render(state!!)
         })
     }
 

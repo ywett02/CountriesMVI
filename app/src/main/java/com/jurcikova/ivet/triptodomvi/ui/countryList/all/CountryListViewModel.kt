@@ -10,6 +10,7 @@ import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListAction.LoadC
 import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListIntent.InitialIntent
 import com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListResult.LoadCountriesResult
 import com.strv.ktools.inject
+import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
@@ -55,6 +56,9 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
     private val statesObservable: Observable<CountryListViewState> = intentsSubject
             .compose(intentFilter)
             .map(this::actionFromIntent)
+            .doOnNext { action ->
+                logD("action: $action")
+            }
             .compose(countryListInteractor.actionProcessor)
             // Cache each state and pass it to the reducer to create a new state from
             // the previous cached one and the latest Result emitted from the action processor.
@@ -90,7 +94,11 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
             LiveDataReactiveStreams.fromPublisher(statesObservable.toFlowable(BackpressureStrategy.BUFFER))
 
     override fun processIntents(intents: Observable<CountryListIntent>) {
-        intents.subscribe(intentsSubject)
+        intents
+                .doOnNext { intent ->
+                    logD("intent: $intent")
+                }
+                .subscribe(intentsSubject)
     }
 
     /**

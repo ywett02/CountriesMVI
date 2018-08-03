@@ -16,6 +16,7 @@ import com.jurcikova.ivet.triptodomvi.mvibase.MviIntent
 import com.jurcikova.ivet.triptodomvi.mvibase.MviView
 import com.jurcikova.ivet.triptodomvi.ui.countryList.CountryAdapter
 import com.strv.ktools.inject
+import com.strv.ktools.logD
 import io.reactivex.Observable
 
 class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListViewState> {
@@ -36,8 +37,10 @@ class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListVi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.states().observe(this, Observer {
-            render(it!!)
+        viewModel.states().observe(this, Observer { state ->
+            logD("state: $state")
+
+            render(state!!)
         })
     }
 
