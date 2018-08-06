@@ -1,11 +1,20 @@
 package com.jurcikova.ivet.triptodomvi.business.entity
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
+
+@Entity
+data class MyCountry(
+        @PrimaryKey val name: String,
+        val flag: String,
+        var visited: Boolean
+)
+
 data class Country(
-        val name: String,
+        @PrimaryKey val name: String,
         val capital: String,
         val region: String,
-        val flag: String,
-        val currencies: List<Currency>
+        val flag: String
 )
 
 data class Currency(

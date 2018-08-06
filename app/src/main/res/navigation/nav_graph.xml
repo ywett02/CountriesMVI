@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/countryListFragment">
+    app:startDestination="@id/myCountryListFragment">
 
     <fragment
         android:id="@+id/countryListFragment"
@@ -22,4 +22,8 @@
         android:id="@+id/countrySearchFragment"
         android:name="com.jurcikova.ivet.triptodomvi.ui.countryList.search.CountrySearchFragment"
         android:label="CountrySearchFragment" />
+    <fragment
+        android:id="@+id/myCountryListFragment"
+        android:name="com.jurcikova.ivet.triptodomvi.ui.myCountries.MyCountryListFragment"
+        android:label="MyCountryListFragment" />
 </navigation>

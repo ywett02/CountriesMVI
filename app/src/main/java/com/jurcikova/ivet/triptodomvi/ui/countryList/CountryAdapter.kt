@@ -18,11 +18,13 @@ class CountryAdapter : ListAdapter<Country, CountryViewHolder>(CountryDiffCallba
             }
 
     override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        getItem(position).let { country ->
+            holder.bind(country)
+        }
     }
 }
 
-class CountryViewHolder(private val itemBinding: ItemCountryBinding) : RecyclerView.ViewHolder(itemBinding.root) {
+class CountryViewHolder(val itemBinding: ItemCountryBinding) : RecyclerView.ViewHolder(itemBinding.root) {
     fun bind(item: Country?) {
         itemBinding.country = item
         itemBinding.executePendingBindings()

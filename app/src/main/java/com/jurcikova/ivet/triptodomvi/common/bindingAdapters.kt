@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.jurcikova.ivet.triptodomvi.R
+import com.strv.ktools.logMe
 
 @BindingAdapter("show")
 fun View.setShow(show: Boolean) {
@@ -20,18 +21,21 @@ fun View.setShow(show: Boolean) {
 @Suppress("UNCHECKED_CAST")
 @BindingAdapter("list")
 fun <E> RecyclerView.setList(list: List<E>?) {
+    list.logMe()
     list?.let {
         (adapter as ListAdapter<E, *>?)?.submitList(it)
     }
 }
 
 @BindingAdapter("svg")
-fun ImageView.setSvgResource(url: String) {
-    GlideApp.with(context)
-            .`as`(PictureDrawable::class.java)
-            .listener(SvgSoftwareLayerSetter())
-            .placeholder(R.drawable.world)
-            .error(R.drawable.world)
-            .load(url)
-            .into(this)
+fun ImageView.setSvgResource(url: String?) {
+    url?.let {
+        GlideApp.with(context)
+                .`as`(PictureDrawable::class.java)
+                .listener(SvgSoftwareLayerSetter())
+                .placeholder(R.drawable.world)
+                .error(R.drawable.world)
+                .load(it)
+                .into(this)
+    }
 }
