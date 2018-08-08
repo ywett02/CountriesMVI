@@ -1,4 +1,4 @@
-package com.jurcikova.ivet.triptodomvi.ui.countryDetail
+package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -9,10 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.RxView
-import com.jurcikova.ivet.triptodomvi.R
-import com.jurcikova.ivet.triptodomvi.common.BindFragment
-import com.jurcikova.ivet.triptodomvi.databinding.FragmentCountryDetailBinding
-import com.jurcikova.ivet.triptodomvi.mvibase.MviView
+import com.jurcikova.ivet.countries.mvi.common.BindFragment
+import com.jurcikova.ivet.countries.mvi.mvibase.MviView
+import com.jurcikova.ivet.mvi.R
+import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
 import io.reactivex.Observable
 

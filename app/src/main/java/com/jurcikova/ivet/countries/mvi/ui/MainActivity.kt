@@ -1,12 +1,12 @@
-package com.jurcikova.ivet.triptodomvi.ui
+package com.jurcikova.ivet.countries.mvi.ui
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
-import com.jurcikova.ivet.triptodomvi.R
-import com.jurcikova.ivet.triptodomvi.common.BindActivity
-import com.jurcikova.ivet.triptodomvi.databinding.ActivityMainBinding
+import com.jurcikova.ivet.countries.mvi.common.BindActivity
+import com.jurcikova.ivet.mvi.R
+import com.jurcikova.ivet.mvi.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 

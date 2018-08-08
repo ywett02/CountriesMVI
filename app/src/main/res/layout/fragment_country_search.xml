@@ -4,7 +4,7 @@
     <data>
         <variable
             name="model"
-            type="com.jurcikova.ivet.triptodomvi.ui.countryList.search.CountrySearchViewState" />
+            type="com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchViewState" />
     </data>
 
 

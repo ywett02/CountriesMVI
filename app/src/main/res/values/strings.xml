@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TripTodoMVI</string>
+    <string name="app_name">CountriesMVI</string>
     <string name="cd_flag">Country flag</string>
     <string name="lbl_empty_countries">No countries</string>
     <string name="hint_search_country">Search a country</string>

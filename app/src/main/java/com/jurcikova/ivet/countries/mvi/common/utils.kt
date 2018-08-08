@@ -1,6 +1,5 @@
-package com.jurcikova.ivet.triptodomvi.common
+package com.jurcikova.ivet.countries.mvi.common
 
-import android.os.Bundle
 import io.reactivex.Observable
 import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport

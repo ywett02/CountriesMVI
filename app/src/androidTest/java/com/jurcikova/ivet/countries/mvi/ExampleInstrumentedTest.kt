@@ -1,4 +1,4 @@
-package com.jurcikova.ivet.triptodomvi
+package com.jurcikova.ivet.mvi
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4

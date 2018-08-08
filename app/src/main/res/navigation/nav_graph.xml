@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/countryListFragment"
-        android:name="com.jurcikova.ivet.triptodomvi.ui.countryList.all.CountryListFragment"
+        android:name="com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListFragment"
         android:label="CountryListFragment" >
         <action
             android:id="@+id/action_countryListFragment_to_countrySearchFragment"
@@ -23,7 +23,7 @@
     </fragment>
     <fragment
         android:id="@+id/countrySearchFragment"
-        android:name="com.jurcikova.ivet.triptodomvi.ui.countryList.search.CountrySearchFragment"
+        android:name="com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchFragment"
         android:label="CountrySearchFragment" >
         <action
             android:id="@+id/action_countrySearchFragment_to_countryDetailFragment"
@@ -31,7 +31,7 @@
     </fragment>
     <fragment
         android:id="@+id/countryDetailFragment"
-        android:name="com.jurcikova.ivet.triptodomvi.ui.countryDetail.CountryDetailFragment"
+        android:name="com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailFragment"
         android:label="CountryDetailFragment" >
         <argument
             android:name="argCountryName"

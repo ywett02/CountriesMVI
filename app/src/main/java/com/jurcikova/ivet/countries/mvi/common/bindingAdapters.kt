@@ -1,4 +1,4 @@
-package com.jurcikova.ivet.triptodomvi.common
+package com.jurcikova.ivet.countries.mvi.common
 
 import android.databinding.BindingAdapter
 import android.graphics.drawable.PictureDrawable
@@ -8,7 +8,7 @@ import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import com.jurcikova.ivet.triptodomvi.R
+import com.jurcikova.ivet.mvi.R
 import com.strv.ktools.logMe
 
 @BindingAdapter("show")

@@ -7,7 +7,7 @@
 
         <variable
             name="countryDetailViewState"
-            type="com.jurcikova.ivet.triptodomvi.ui.countryDetail.CountryDetailViewState" />
+            type="com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailViewState" />
     </data>
 
     <FrameLayout

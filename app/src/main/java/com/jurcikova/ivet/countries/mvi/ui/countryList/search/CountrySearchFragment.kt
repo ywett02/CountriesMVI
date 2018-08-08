@@ -1,4 +1,4 @@
-package com.jurcikova.ivet.triptodomvi.ui.countryList.all
+package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -10,45 +10,47 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
-import com.jakewharton.rxbinding2.support.v4.widget.refreshes
-import com.jurcikova.ivet.triptodomvi.R
-import com.jurcikova.ivet.triptodomvi.common.BindFragment
-import com.jurcikova.ivet.triptodomvi.databinding.FragmentCountryListBinding
-import com.jurcikova.ivet.triptodomvi.mvibase.MviIntent
-import com.jurcikova.ivet.triptodomvi.mvibase.MviView
-import com.jurcikova.ivet.triptodomvi.ui.countryList.CountryAdapter
+import com.jakewharton.rxbinding2.widget.RxSearchView
+import com.jurcikova.ivet.countries.mvi.common.BindFragment
+import com.jurcikova.ivet.countries.mvi.mvibase.MviView
+import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
+import com.jurcikova.ivet.countriesMVI.mvibase.MviIntent
+import com.jurcikova.ivet.mvi.R
+import com.jurcikova.ivet.mvi.databinding.FragmentCountrySearchBinding
 import com.strv.ktools.inject
 import com.strv.ktools.logD
 import io.reactivex.Observable
+import java.util.concurrent.TimeUnit
 
-class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListViewState> {
+class CountrySearchFragment : Fragment(), MviView<CountrySearchIntent, CountrySearchViewState> {
 
-    private val viewModel: CountryListViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProviders.of(this).get(CountryListViewModel::class.java)
+    private val viewModel: CountrySearchViewModel by lazy(LazyThreadSafetyMode.NONE) {
+        ViewModelProviders.of(this).get(CountrySearchViewModel::class.java)
     }
 
     //delegate the binding initialization to BindFragment delegate
-    private val binding: FragmentCountryListBinding by BindFragment(R.layout.fragment_country_list)
+    private val binding: FragmentCountrySearchBinding by BindFragment(R.layout.fragment_country_search)
 
     private val adapter by inject<CountryAdapter>()
 
-    private val initialIntent by lazy {
-        Observable.just(CountryListIntent.InitialIntent)
-    }
-
-    private val swipeToRefreshIntent by lazy {
-        binding.swiperefresh.refreshes()
-                .map {
-                    CountryListIntent.SwipeToRefresh
+    private val searchIntent by lazy {
+        RxSearchView.queryTextChanges(binding.searchView)
+                //because after orientation change the passed value would be emitted
+                .skip(2)
+                .filter {
+                    it.length > 2 || it.isEmpty()
                 }
+                .debounce(500, TimeUnit.MILLISECONDS)
+                .map {
+                    CountrySearchIntent.SearchIntent(it.toString())
+                }.cast(CountrySearchIntent::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         viewModel.states().observe(this, Observer { state ->
-            logD("state: $state")
-
+            logD("state: Search $state")
             render(state!!)
         })
     }
@@ -66,7 +68,7 @@ class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListVi
         startStream()
     }
 
-    override fun render(state: CountryListViewState) {
+    override fun render(state: CountrySearchViewState) {
         binding.model = state
 
         if (state.error != null) {
@@ -74,10 +76,7 @@ class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListVi
         }
     }
 
-    override fun intents() = Observable.merge(
-            initialIntent,
-            swipeToRefreshIntent
-    )
+    override fun intents() = searchIntent as Observable<CountrySearchIntent>
 
     /**
      *  Start the stream by passing [MviIntent] to [MviViewModel]
@@ -92,7 +91,7 @@ class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListVi
         binding.rvCountries.adapter = adapter
 
         adapter.countryClickObservable.observe(this, Observer { country ->
-            val action = CountryListFragmentDirections.actionCountryListFragmentToCountryDetailFragment(country!!.name)
+            val action = CountrySearchFragmentDirections.actionCountrySearchFragmentToCountryDetailFragment(country!!.name)
             findNavController().navigate(action)
         })
     }
