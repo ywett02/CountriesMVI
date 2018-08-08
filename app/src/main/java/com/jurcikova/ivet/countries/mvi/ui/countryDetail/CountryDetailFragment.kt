@@ -3,23 +3,16 @@ package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import com.jakewharton.rxbinding2.view.RxView
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
-import com.jurcikova.ivet.countries.mvi.mvibase.MviView
+import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
 import io.reactivex.Observable
 
-class CountryDetailFragment : Fragment(), MviView<CountryDetailIntent, CountryDetailViewState> {
-
-    //delegate the binding initialization to BindFragment delegate
-    private val binding: FragmentCountryDetailBinding by BindFragment(R.layout.fragment_country_detail)
+class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>() {
 
     private val viewModel: CountryDetailViewModel by lazy(LazyThreadSafetyMode.NONE) {
         ViewModelProviders.of(this).get(CountryDetailViewModel::class.java)
@@ -38,6 +31,8 @@ class CountryDetailFragment : Fragment(), MviView<CountryDetailIntent, CountryDe
         }
     }
 
+    override val binding: FragmentCountryDetailBinding by BindFragment(R.layout.fragment_country_detail)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -48,13 +43,11 @@ class CountryDetailFragment : Fragment(), MviView<CountryDetailIntent, CountryDe
         })
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? = binding.root
+    override fun initViews() {
+    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        startStream()
+    override fun startStream() {
+        viewModel.processIntents(intents())
     }
 
     override fun intents(): Observable<CountryDetailIntent> = Observable.merge(
@@ -70,6 +63,10 @@ class CountryDetailFragment : Fragment(), MviView<CountryDetailIntent, CountryDe
         if (state.showMessage) {
             showMessage(state.isFavorite)
         }
+
+        state.error?.let {
+            showErrorMessage(it)
+        }
     }
 
     private fun showMessage(isFavorite: Boolean) {
@@ -78,7 +75,9 @@ class CountryDetailFragment : Fragment(), MviView<CountryDetailIntent, CountryDe
         }
     }
 
-    private fun startStream() {
-        viewModel.processIntents(intents())
+    private fun showErrorMessage(exception: Throwable) {
+        activity?.let {
+            Toast.makeText(it, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
     }
 }

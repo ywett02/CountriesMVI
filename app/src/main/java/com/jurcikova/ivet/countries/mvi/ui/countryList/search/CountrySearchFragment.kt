@@ -3,18 +3,13 @@ package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import com.jakewharton.rxbinding2.widget.RxSearchView
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
-import com.jurcikova.ivet.countries.mvi.mvibase.MviView
+import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
-import com.jurcikova.ivet.countriesMVI.mvibase.MviIntent
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountrySearchBinding
 import com.strv.ktools.inject
@@ -22,16 +17,13 @@ import com.strv.ktools.logD
 import io.reactivex.Observable
 import java.util.concurrent.TimeUnit
 
-class CountrySearchFragment : Fragment(), MviView<CountrySearchIntent, CountrySearchViewState> {
+class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, CountrySearchIntent, CountrySearchViewState>() {
+
+    private val adapter by inject<CountryAdapter>()
 
     private val viewModel: CountrySearchViewModel by lazy(LazyThreadSafetyMode.NONE) {
         ViewModelProviders.of(this).get(CountrySearchViewModel::class.java)
     }
-
-    //delegate the binding initialization to BindFragment delegate
-    private val binding: FragmentCountrySearchBinding by BindFragment(R.layout.fragment_country_search)
-
-    private val adapter by inject<CountryAdapter>()
 
     private val searchIntent by lazy {
         RxSearchView.queryTextChanges(binding.searchView)
@@ -46,6 +38,8 @@ class CountrySearchFragment : Fragment(), MviView<CountrySearchIntent, CountrySe
                 }.cast(CountrySearchIntent::class.java)
     }
 
+    override val binding: FragmentCountrySearchBinding by BindFragment(R.layout.fragment_country_search)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,33 +49,21 @@ class CountrySearchFragment : Fragment(), MviView<CountrySearchIntent, CountrySe
         })
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? = binding.root
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun initViews() {
         setupListView()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        startStream()
-    }
+    override fun intents() = searchIntent as Observable<CountrySearchIntent>
 
     override fun render(state: CountrySearchViewState) {
         binding.model = state
 
         if (state.error != null) {
-            showErrorState(state.error)
+            showErrorMessage(state.error)
         }
     }
 
-    override fun intents() = searchIntent as Observable<CountrySearchIntent>
-
-    /**
-     *  Start the stream by passing [MviIntent] to [MviViewModel]
-     */
-    private fun startStream() {
+    override fun startStream() {
         // Pass the UI's intents to the ViewModel
         viewModel.processIntents(intents())
     }
@@ -96,7 +78,7 @@ class CountrySearchFragment : Fragment(), MviView<CountrySearchIntent, CountrySe
         })
     }
 
-    private fun showErrorState(exception: Throwable) {
+    private fun showErrorMessage(exception: Throwable) {
         activity?.let {
             Toast.makeText(it, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
         }

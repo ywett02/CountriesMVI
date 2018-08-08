@@ -2,21 +2,18 @@ package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.LiveDataReactiveStreams
-import android.arch.lifecycle.ViewModel
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
 import com.jurcikova.ivet.countries.mvi.common.notOfType
-import com.jurcikova.ivet.countries.mvi.mvibase.MviViewModel
+import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
 import com.strv.ktools.inject
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
-import io.reactivex.subjects.PublishSubject
 
-class CountryDetailViewModel : ViewModel(), MviViewModel<CountryDetailIntent, CountryDetailViewState> {
+class CountryDetailViewModel : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
 
-    private val intentsSubject: PublishSubject<CountryDetailIntent> = PublishSubject.create()
     private val countryDetailInteractor by inject<CountryDetailInteractor>()
 
     private val intentFilter: ObservableTransformer<CountryDetailIntent, CountryDetailIntent>
@@ -29,14 +26,7 @@ class CountryDetailViewModel : ViewModel(), MviViewModel<CountryDetailIntent, Co
             }
         }
 
-    /**
-     * The Reducer is where [MviViewState], that the [MviView] will use to
-     * render itself, are created.
-     * It takes the last cached [MviViewState], the latest [MviResult] and
-     * creates a new [MviViewState] by only updating the related fields.
-     * This is basically like a big switch statement of all possible types for the [MviResult]
-     */
-    private val reducer = BiFunction { previousState: CountryDetailViewState, result: CountryDetailResult ->
+    override val reducer = BiFunction { previousState: CountryDetailViewState, result: CountryDetailResult ->
         when (result) {
             is CountryDetailResult.LoadCountryDetailResult -> when (result) {
                 is CountryDetailResult.LoadCountryDetailResult.Success -> previousState.copy(isLoading = false, country = result.country)
@@ -58,10 +48,7 @@ class CountryDetailViewModel : ViewModel(), MviViewModel<CountryDetailIntent, Co
         }
     }
 
-    /**
-     * Compose all components to create the stream logic
-     */
-   val statesObservable: Observable<CountryDetailViewState> = intentsSubject
+    override val statesObservable: Observable<CountryDetailViewState> = intentsSubject
             .compose(intentFilter)
             .map(this::actionFromIntent)
             .doOnNext { action ->
@@ -92,12 +79,10 @@ class CountryDetailViewModel : ViewModel(), MviViewModel<CountryDetailIntent, Co
                 .subscribe(intentsSubject)
     }
 
-
-
     override fun states(): LiveData<CountryDetailViewState> =
             LiveDataReactiveStreams.fromPublisher(statesObservable.toFlowable(BackpressureStrategy.BUFFER))
 
-    private fun actionFromIntent(intent: CountryDetailIntent): CountryDetailAction {
+    override fun actionFromIntent(intent: CountryDetailIntent): CountryDetailAction {
         return when (intent) {
             is CountryDetailIntent.InitialIntent -> CountryDetailAction.LoadCountryDetailAction(intent.countryName)
             is CountryDetailIntent.AddToFavoriteIntent -> CountryDetailAction.AddToFavoriteAction(intent.countryName)

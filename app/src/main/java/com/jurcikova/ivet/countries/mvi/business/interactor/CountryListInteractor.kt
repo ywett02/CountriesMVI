@@ -17,25 +17,10 @@ class CountryListInteractor() : MviInteractor<CountryListAction, CountryListResu
 
     private val countryRepository by inject<CountryRepository>()
 
-    /**
-     * Splits the [Observable] to match each type of [MviAction] to
-     * its corresponding business logic. Each takes a defined [MviAction],
-     * returns a defined [MviResult]
-     * The global actionProcessor then merges all [Observable] back to
-     * one unique [Observable].
-     *
-     *
-     * The splitting is done using [Observable.publish] which allows almost anything
-     * on the passed [Observable] as long as one and only one [Observable] is returned.
-     *
-     *
-     * An security layer is also added for unhandled [MviAction] to allow early crash
-     * at runtime to easy the maintenance.
-     */
     override val actionProcessor =
             ObservableTransformer<CountryListAction, CountryListResult> { actions ->
                 actions.publish { selector ->
-                    selector.ofType(LoadCountriesAction::class.java).compose(loadTasks)
+                    selector.ofType(LoadCountriesAction::class.java).compose(loadCountries)
                             .doOnNext { result ->
                                 logD("result: $result")
                             }
@@ -51,8 +36,7 @@ class CountryListInteractor() : MviInteractor<CountryListAction, CountryListResu
                 }
             }
 
-    //todo check types
-    private val loadTasks =
+    private val loadCountries =
             ObservableTransformer<LoadCountriesAction, CountryListResult> { actions ->
                 actions.flatMap { action ->
                     countryRepository.getAllCountries()

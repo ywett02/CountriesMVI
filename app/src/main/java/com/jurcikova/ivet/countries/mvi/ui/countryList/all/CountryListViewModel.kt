@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModel
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor
 import com.jurcikova.ivet.countries.mvi.common.notOfType
 import com.jurcikova.ivet.countries.mvi.mvibase.MviViewModel
+import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.SwipeToRefresh
@@ -18,18 +19,25 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
 
-class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, CountryListViewState> {
+class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
 
     private val countryListInteractor by inject<CountryListInteractor>()
 
     /**
-     * The Reducer is where [MviViewState], that the [MviView] will use to
-     * render itself, are created.
-     * It takes the last cached [MviViewState], the latest [MviResult] and
-     * creates a new [MviViewState] by only updating the related fields.
-     * This is basically like a big switch statement of all possible types for the [MviResult]
+     * take only the first ever InitialIntent and all intents of other types
+     * to avoid reloading data on config changes
      */
-    private val reducer = BiFunction { previousState: CountryListViewState, result: CountryListResult ->
+    private val intentFilter: ObservableTransformer<CountryListIntent, CountryListIntent>
+        get() = ObservableTransformer { intents ->
+            intents.publish { selected ->
+                Observable.merge(
+                        selected.ofType(InitialIntent::class.java).take(1),
+                        selected.notOfType(InitialIntent::class.java)
+                )
+            }
+        }
+
+    override val reducer = BiFunction { previousState: CountryListViewState, result: CountryListResult ->
         when (result) {
             is LoadCountriesResult -> when (result) {
                 is LoadCountriesResult.Success -> {
@@ -50,16 +58,7 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
         }
     }
 
-    /**
-     * Proxy subject used to keep the stream alive even after the UI gets recycled.
-     * This is basically used to keep ongoing events and the last cached State alive
-     * while the UI disconnects and reconnects on config changes.
-     */
-    private val intentsSubject: PublishSubject<CountryListIntent> = PublishSubject.create()
-    /**
-     * Compose all components to create the stream logic
-     */
-    private val statesObservable: Observable<CountryListViewState> = intentsSubject
+    override val statesObservable: Observable<CountryListViewState> = intentsSubject
             .compose(intentFilter)
             .map(this::actionFromIntent)
             .doOnNext { action ->
@@ -82,20 +81,6 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
             // match the stream's lifecycle to the ViewModel's one.
             .autoConnect(0)
 
-    /**
-     * take only the first ever InitialIntent and all intents of other types
-     * to avoid reloading data on config changes
-     */
-    private val intentFilter: ObservableTransformer<CountryListIntent, CountryListIntent>
-        get() = ObservableTransformer { intents ->
-            intents.publish { selected ->
-                Observable.merge(
-                        selected.ofType(InitialIntent::class.java).take(1),
-                        selected.notOfType(InitialIntent::class.java)
-                )
-            }
-        }
-
     override fun states(): LiveData<CountryListViewState> =
             LiveDataReactiveStreams.fromPublisher(statesObservable.toFlowable(BackpressureStrategy.BUFFER))
 
@@ -107,11 +92,7 @@ class CountryListViewModel : ViewModel(), MviViewModel<CountryListIntent, Countr
                 .subscribe(intentsSubject)
     }
 
-    /**
-     * Translate an [MviIntent] to an [MviAction].
-     * Used to decouple the UI and the business logic to allow easy testings and reusability.
-     */
-    private fun actionFromIntent(intent: CountryListIntent): CountryListAction {
+    override fun actionFromIntent(intent: CountryListIntent): CountryListAction {
         return when (intent) {
             is InitialIntent -> LoadCountriesAction(false)
             is SwipeToRefresh -> LoadCountriesAction(true)
