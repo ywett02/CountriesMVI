@@ -10,6 +10,7 @@ import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
+import com.strv.ktools.logMe
 import io.reactivex.Observable
 
 class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>() {
@@ -18,16 +19,17 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
         ViewModelProviders.of(this).get(CountryDetailViewModel::class.java)
     }
 
-    private var isCountryFavorite = false
-
     private val initialIntent by lazy {
         Observable.just(CountryDetailIntent.InitialIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName) as CountryDetailIntent)
     }
 
     private val favoriteButtonClickedIntent by lazy {
-        RxView.clicks(binding.fabAdd).map {
-            if (!isCountryFavorite) CountryDetailIntent.AddToFavoriteIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName)
-            else CountryDetailIntent.RemoveFavoriteIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName)
+        RxView.clicks(binding.fabAdd).flatMap {
+            viewModel.statesStream().map {
+                if (!it.isFavorite) CountryDetailIntent.AddToFavoriteIntent(it.country!!.name) else {
+                    CountryDetailIntent.RemoveFavoriteIntent(it.country!!.name)
+                }
+            }.take(1)
         }
     }
 
@@ -57,8 +59,6 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
 
     override fun render(state: CountryDetailViewState) {
         binding.countryDetailViewState = state
-
-        isCountryFavorite = state.isFavorite
 
         if (state.showMessage) {
             showMessage(state.isFavorite)

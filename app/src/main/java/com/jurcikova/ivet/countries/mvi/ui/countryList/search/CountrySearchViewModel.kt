@@ -33,7 +33,6 @@ class CountrySearchViewModel : BaseViewModel<CountrySearchIntent, CountrySearchA
             }
             is CountrySearchResult.LoadCountriesByNameResult.Failure -> previousState.copy(isLoading = false, searchNotStartedYet = false, error = result.error)
             is CountrySearchResult.LoadCountriesByNameResult.InProgress -> previousState.copy(isLoading = true, searchNotStartedYet = false, searchQuery = result.searchQuery, error = null)
-            is CountrySearchResult.LoadCountriesByNameResult.EmptyResult -> previousState.copy(isLoading = false, searchNotStartedYet = false, error = null, countries = emptyList())
         }
     }
 

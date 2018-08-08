@@ -89,4 +89,6 @@ class CountryDetailViewModel : BaseViewModel<CountryDetailIntent, CountryDetailA
             is CountryDetailIntent.RemoveFavoriteIntent -> CountryDetailAction.RemoveFromFavoriteAction(intent.countryName)
         }
     }
+
+    fun statesStream() = statesObservable
 }

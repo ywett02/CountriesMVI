@@ -49,7 +49,7 @@ class CountrySearchInteractor : MviInteractor<CountrySearchAction, CountrySearch
                                 .onErrorReturn { error ->
                                     //because in case of empty result api returns 404 :(
                                     if (error is HttpException && error.code() == 404) {
-                                        CountrySearchResult.LoadCountriesByNameResult.EmptyResult
+                                        CountrySearchResult.LoadCountriesByNameResult.Success(emptyList())
                                     } else CountrySearchResult.LoadCountriesByNameResult.Failure(error)
                                 }
                                 .subscribeOn(Schedulers.io())
