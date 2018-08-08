@@ -17,7 +17,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:titleTextColor="@color/search_toolbar_title" />
+            app:titleTextColor="@color/toolbar_text_color" />
 
         <fragment
             android:id="@+id/my_nav_host_fragment"

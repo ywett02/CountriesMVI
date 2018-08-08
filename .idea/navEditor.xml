@@ -8,17 +8,34 @@
             <LayoutPositions>
               <option name="myPositions">
                 <map>
+                  <entry key="countryDetailFragment">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="116" />
+                            <option name="y" value="-342" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="countryListFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="-191" />
-                            <option name="y" value="5" />
+                            <option name="x" value="-84" />
+                            <option name="y" value="88" />
                           </Point>
                         </option>
                         <option name="myPositions">
                           <map>
+                            <entry key="action_countryListFragment_to_countryDetailFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                             <entry key="action_countryListFragment_to_countrySearchFragment">
                               <value>
                                 <LayoutPositions />
@@ -34,21 +51,18 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="99" />
-                            <option name="y" value="50" />
+                            <option name="x" value="184" />
+                            <option name="y" value="345" />
                           </Point>
                         </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="myCountryListFragment">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="-377" />
-                            <option name="y" value="-89" />
-                          </Point>
+                        <option name="myPositions">
+                          <map>
+                            <entry key="action_countrySearchFragment_to_countryDetailFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                          </map>
                         </option>
                       </LayoutPositions>
                     </value>

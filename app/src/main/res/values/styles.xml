@@ -10,4 +10,18 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
+    <style name="TextAppearance.AppTheme.ScreenTitle" parent="TextAppearance.AppCompat.Display1">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/toolbar_text_color</item>
+        <item name="android:background">@drawable/bg_text</item>
+    </style>
+
+    <style name="TextAppearance.AppTheme.Title.Light" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textColor">@color/toolbar_text_color</item>
+    </style>
+
+    <style name="ThemeOverlay.AppTheme.ControlPrimary" parent="ThemeOverlay.AppCompat.Light">
+        <item name="colorControlNormal">@color/colorPrimaryDark</item>
+    </style>
+
 </resources>

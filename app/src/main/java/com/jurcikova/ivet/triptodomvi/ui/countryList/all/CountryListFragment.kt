@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import com.jakewharton.rxbinding2.support.v4.widget.refreshes
 import com.jurcikova.ivet.triptodomvi.R
 import com.jurcikova.ivet.triptodomvi.common.BindFragment
@@ -89,6 +90,11 @@ class CountryListFragment : Fragment(), MviView<CountryListIntent, CountryListVi
     private fun setupListView() {
         binding.rvCountries.layoutManager = LinearLayoutManager(activity)
         binding.rvCountries.adapter = adapter
+
+        adapter.countryClickObservable.observe(this, Observer { country ->
+            val action = CountryListFragmentDirections.actionCountryListFragmentToCountryDetailFragment(country!!.name)
+            findNavController().navigate(action)
+        })
     }
 
     private fun showErrorState(exception: Throwable) {

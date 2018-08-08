@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/myCountryListFragment">
+    app:startDestination="@id/countryListFragment">
 
     <fragment
         android:id="@+id/countryListFragment"
@@ -17,13 +17,23 @@
             app:launchSingleTop="false"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_countryListFragment_to_countryDetailFragment"
+            app:destination="@id/countryDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/countrySearchFragment"
         android:name="com.jurcikova.ivet.triptodomvi.ui.countryList.search.CountrySearchFragment"
-        android:label="CountrySearchFragment" />
+        android:label="CountrySearchFragment" >
+        <action
+            android:id="@+id/action_countrySearchFragment_to_countryDetailFragment"
+            app:destination="@id/countryDetailFragment" />
+    </fragment>
     <fragment
-        android:id="@+id/myCountryListFragment"
-        android:name="com.jurcikova.ivet.triptodomvi.ui.myCountries.MyCountryListFragment"
-        android:label="MyCountryListFragment" />
+        android:id="@+id/countryDetailFragment"
+        android:name="com.jurcikova.ivet.triptodomvi.ui.countryDetail.CountryDetailFragment"
+        android:label="CountryDetailFragment" >
+        <argument
+            android:name="argCountryName"
+            app:argType="string" /></fragment>
 </navigation>

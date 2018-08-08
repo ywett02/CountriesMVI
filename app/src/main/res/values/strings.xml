@@ -7,4 +7,5 @@
     <string name="search_hint">Search country</string>
     <string name="country_state_visited">Visited</string>
     <string name="country_state_unvisited">Unvisited</string>
+    <string name="area">%s km\u00B2</string>
 </resources>

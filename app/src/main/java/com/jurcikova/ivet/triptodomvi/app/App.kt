@@ -10,7 +10,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        setLogTag("Uncommon")
+        setLogTag("CountriesMVI")
         setupModule(module)
     }
 }
