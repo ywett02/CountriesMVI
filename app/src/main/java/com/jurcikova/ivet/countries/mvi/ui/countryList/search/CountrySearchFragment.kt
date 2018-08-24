@@ -45,7 +45,7 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        launch(UI) {
+        launch(UI, parent = job) {
             viewModel.state.consume {
                 for (state in this) {
                     state.logMe()
@@ -58,16 +58,16 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
     }
 
     override fun setupIntents() {
-        var job = Job()
+        var searchJob = Job()
         var skippedFirst = false
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String): Boolean = true
             override fun onQueryTextChange(p0: String): Boolean {
                 if ((p0.length > 2 || p0.isBlank()) && skippedFirst) {
-                    job.cancel()
+                    searchJob.cancel()
 
-                    job = launch(UI) {
+                    searchJob = launch(UI, parent = job) {
                         delay(500)
                         intents.send(CountrySearchIntent.SearchIntent(p0))
                     }

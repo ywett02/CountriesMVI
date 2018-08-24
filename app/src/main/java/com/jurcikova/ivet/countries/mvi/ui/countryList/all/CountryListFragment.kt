@@ -43,7 +43,7 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        launch(UI) {
+        launch(UI, parent = job) {
             viewModel.state.consume {
                 for (state in this) {
                     state.logMe()
@@ -56,12 +56,12 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
     }
 
     override fun setupIntents() {
-        launch(UI) {
+        launch(UI, parent = job) {
             intents.offer(CountryListIntent.InitialIntent)
         }
 
         binding.swiperefresh.setOnRefreshListener {
-            launch(UI) {
+            launch(UI, parent = job) {
                 intents.send(CountryListIntent.SwipeToRefresh)
             }
         }

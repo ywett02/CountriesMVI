@@ -32,7 +32,7 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        launch(UI) {
+        launch(UI, parent = job) {
             viewModel.state.consume {
                 for (state in this) {
                     state.logMe()
@@ -45,7 +45,7 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     }
 
     override fun setupIntents() {
-        launch(UI) {
+        launch(UI, parent = job) {
             intents.send(CountryDetailIntent.InitialIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName))
         }
 
