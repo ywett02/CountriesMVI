@@ -1,59 +1,86 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
-import com.jakewharton.rxbinding2.widget.RxSearchView
+import com.jurcikova.ivet.countries.mvi.business.entity.Country
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
+import com.jurcikova.ivet.countries.mvi.common.OnItemClickListener
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountrySearchBinding
-import com.strv.ktools.inject
-import com.strv.ktools.logD
-import io.reactivex.Observable
-import java.util.concurrent.TimeUnit
+import com.strv.ktools.logMe
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.channels.actor
+import kotlinx.coroutines.experimental.channels.consume
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 
 class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, CountrySearchIntent, CountrySearchViewState>() {
 
-    private val adapter by inject<CountryAdapter>()
+    private val adapter = CountryAdapter(object : OnItemClickListener<Country> {
+        override fun onItemClick(item: Country) {
+            showCountryDetail(item.name)
+        }
+    })
 
     private val viewModel: CountrySearchViewModel by lazy(LazyThreadSafetyMode.NONE) {
         ViewModelProviders.of(this).get(CountrySearchViewModel::class.java)
     }
 
-    private val searchIntent by lazy {
-        RxSearchView.queryTextChanges(binding.searchView)
-                //because after orientation change the passed value would be emitted
-                .skip(2)
-                .filter {
-                    it.length > 2 || it.isEmpty()
-                }
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .map {
-                    CountrySearchIntent.SearchIntent(it.toString())
-                }.cast(CountrySearchIntent::class.java)
-    }
-
     override val binding: FragmentCountrySearchBinding by BindFragment(R.layout.fragment_country_search)
+
+    override val intents = actor<CountrySearchIntent> {
+        for (intent in channel) {
+            intent.logMe()
+            viewModel.intentProcessor.send(intent)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.states().observe(this, Observer { state ->
-            logD("state: Search $state")
-            render(state!!)
+        launch(UI) {
+            viewModel.state.consume {
+                for (state in this) {
+                    state.logMe()
+                    render(state)
+                }
+            }
+        }
+
+        setupIntents()
+    }
+
+    override fun setupIntents() {
+        var job = Job()
+        var skippedFirst = false
+
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(p0: String): Boolean = true
+            override fun onQueryTextChange(p0: String): Boolean {
+                if ((p0.length > 2 || p0.isBlank()) && skippedFirst) {
+                    job.cancel()
+
+                    job = launch(UI) {
+                        delay(500)
+                        intents.send(CountrySearchIntent.SearchIntent(p0))
+                    }
+                }
+                skippedFirst = true
+                return true
+            }
         })
     }
 
     override fun initViews() {
         setupListView()
     }
-
-    override fun intents() = searchIntent as Observable<CountrySearchIntent>
 
     override fun render(state: CountrySearchViewState) {
         binding.model = state
@@ -63,24 +90,19 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
         }
     }
 
-    override fun startStream() {
-        // Pass the UI's intents to the ViewModel
-        viewModel.processIntents(intents())
-    }
-
     private fun setupListView() {
         binding.rvCountries.layoutManager = LinearLayoutManager(activity)
         binding.rvCountries.adapter = adapter
-
-        adapter.countryClickObservable.observe(this, Observer { country ->
-            val action = CountrySearchFragmentDirections.actionCountrySearchFragmentToCountryDetailFragment(country!!.name)
-            findNavController().navigate(action)
-        })
     }
 
     private fun showErrorMessage(exception: Throwable) {
         activity?.let {
             Toast.makeText(it, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun showCountryDetail(name: String) {
+        val action = CountrySearchFragmentDirections.actionCountrySearchFragmentToCountryDetailFragment(name)
+        findNavController().navigate(action)
     }
 }

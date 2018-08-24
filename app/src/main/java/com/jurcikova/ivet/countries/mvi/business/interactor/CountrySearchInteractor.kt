@@ -1,61 +1,43 @@
 package com.jurcikova.ivet.countries.mvi.business.interactor
 
-import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.jurcikova.ivet.countries.mvi.business.repository.CountryRepository
 import com.jurcikova.ivet.countries.mvi.mvibase.MviInteractor
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult
 import com.strv.ktools.inject
-import com.strv.ktools.logD
-import io.reactivex.Observable
-import io.reactivex.ObservableTransformer
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import com.strv.ktools.logMe
+import kotlinx.coroutines.experimental.channels.ReceiveChannel
+import kotlinx.coroutines.experimental.channels.produce
+import retrofit2.HttpException
 
 class CountrySearchInteractor : MviInteractor<CountrySearchAction, CountrySearchResult> {
 
     private val countryRepository by inject<CountryRepository>()
 
-    override val actionProcessor =
-            ObservableTransformer<CountrySearchAction, CountrySearchResult> { actions ->
-                actions.publish { selector ->
-                    selector.ofType(CountrySearchAction.LoadCountriesByNameAction::class.java)
-                            .compose(loadCountriesByName)
-                            .doOnNext { result ->
-                                logD("result: $result")
-                            }
-                            .mergeWith(
-                                    // Error for not implemented actions
-                                    selector.filter { v ->
-                                        v !is CountrySearchAction.LoadCountriesByNameAction
-                                    }.flatMap { w ->
-                                        Observable.error<CountrySearchResult>(
-                                                IllegalArgumentException("Unknown Action type: $w"))
-                                    }
-                            )
-                }
-            }
+    override fun processAction(action: CountrySearchAction): ReceiveChannel<CountrySearchResult> {
+        action.logMe()
 
-    private val loadCountriesByName =
-            ObservableTransformer<CountrySearchAction.LoadCountriesByNameAction, CountrySearchResult> { actions ->
-                actions.flatMap { action ->
-                    if (action.searchQuery.isBlank()) {
-                        Observable.just(CountrySearchResult.LoadCountriesByNameResult.NotStarted)
-                    } else {
-                        countryRepository.getCountriesByName(action.searchQuery)
-                                .toObservable()
-                                .map { countries -> CountrySearchResult.LoadCountriesByNameResult.Success(countries) }
-                                .cast(CountrySearchResult.LoadCountriesByNameResult::class.java)
-                                .onErrorReturn { error ->
-                                    //because in case of empty result api returns 404 :(
-                                    if (error is HttpException && error.code() == 404) {
-                                        CountrySearchResult.LoadCountriesByNameResult.Success(emptyList())
-                                    } else CountrySearchResult.LoadCountriesByNameResult.Failure(error)
-                                }
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .startWith(CountrySearchResult.LoadCountriesByNameResult.InProgress(action.searchQuery))
-                    }
-                }
+        when (action) {
+            is CountrySearchAction.LoadCountriesByNameAction -> {
+                return produceSearchCountriesResult(action.searchQuery)
             }
+        }
+    }
+
+    private fun produceSearchCountriesResult(query: String) = produce<CountrySearchResult> {
+        if (query.isBlank()) {
+            send(CountrySearchResult.LoadCountriesByNameResult.NotStarted)
+        } else {
+            send(CountrySearchResult.LoadCountriesByNameResult.InProgress(query))
+            send(
+                    try {
+                        CountrySearchResult.LoadCountriesByNameResult.Success(countryRepository.getCountriesByName(query))
+                    } catch (httpException: HttpException) {
+                        CountrySearchResult.LoadCountriesByNameResult.Success(emptyList())
+                    } catch (exception: Exception) {
+                        CountrySearchResult.LoadCountriesByNameResult.Failure(exception)
+                    }
+            )
+        }
+    }
 }

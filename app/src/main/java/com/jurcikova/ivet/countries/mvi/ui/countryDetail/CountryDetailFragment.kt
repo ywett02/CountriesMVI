@@ -1,17 +1,18 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.widget.Toast
-import com.jakewharton.rxbinding2.view.RxView
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
+import com.jurcikova.ivet.countries.mvi.common.onClick
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
-import com.strv.ktools.logD
 import com.strv.ktools.logMe
-import io.reactivex.Observable
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.channels.actor
+import kotlinx.coroutines.experimental.channels.consume
+import kotlinx.coroutines.experimental.launch
 
 class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>() {
 
@@ -19,43 +20,45 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
         ViewModelProviders.of(this).get(CountryDetailViewModel::class.java)
     }
 
-    private val initialIntent by lazy {
-        Observable.just(CountryDetailIntent.InitialIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName) as CountryDetailIntent)
-    }
+    override val binding: FragmentCountryDetailBinding by BindFragment(R.layout.fragment_country_detail)
 
-    private val favoriteButtonClickedIntent by lazy {
-        RxView.clicks(binding.fabAdd).flatMap {
-            viewModel.statesStream().map {
-                if (!it.isFavorite) CountryDetailIntent.AddToFavoriteIntent(it.country!!.name) else {
-                    CountryDetailIntent.RemoveFavoriteIntent(it.country!!.name)
-                }
-            }.take(1)
+    override val intents = actor<CountryDetailIntent> {
+        for (intent in channel) {
+            intent.logMe()
+            viewModel.intentProcessor.send(intent)
         }
     }
-
-    override val binding: FragmentCountryDetailBinding by BindFragment(R.layout.fragment_country_detail)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.states().observe(this, Observer { state ->
-            logD("state: $state")
+        launch(UI) {
+            viewModel.state.consume {
+                for (state in this) {
+                    state.logMe()
+                    render(state)
+                }
+            }
+        }
 
-            render(state!!)
-        })
+        setupIntents()
+    }
+
+    override fun setupIntents() {
+        launch(UI) {
+            intents.send(CountryDetailIntent.InitialIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName))
+        }
+
+        binding.fabAdd.onClick {
+            viewModel.state.value.let {
+                if (it.isFavorite) intents.send(CountryDetailIntent.RemoveFromFavoriteIntent(it.country!!.name))
+                else intents.send(CountryDetailIntent.AddToFavoriteIntent(it.country!!.name))
+            }
+        }
     }
 
     override fun initViews() {
     }
-
-    override fun startStream() {
-        viewModel.processIntents(intents())
-    }
-
-    override fun intents(): Observable<CountryDetailIntent> = Observable.merge(
-            initialIntent,
-            favoriteButtonClickedIntent
-    )
 
     override fun render(state: CountryDetailViewState) {
         binding.countryDetailViewState = state

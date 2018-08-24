@@ -1,8 +1,7 @@
 package com.jurcikova.ivet.countries.mvi.mvibase
 
-import android.arch.lifecycle.LiveData
-import com.jurcikova.ivet.countriesMVI.mvibase.MviIntent
-import io.reactivex.Observable
+import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.experimental.channels.SendChannel
 
 /**
  * Object that will subscribes to a [MviView]'s [MviIntent]s,
@@ -13,7 +12,8 @@ import io.reactivex.Observable
  * @param S Top class of the [MviViewState] the [MviViewModel] will be emitting.
  */
 interface MviViewModel<I : MviIntent, S : MviViewState> {
-  fun processIntents(intents: Observable<I>)
 
-  fun states(): LiveData<S>
+  val intentProcessor: SendChannel<I>
+
+  val state: ConflatedBroadcastChannel<S>
 }

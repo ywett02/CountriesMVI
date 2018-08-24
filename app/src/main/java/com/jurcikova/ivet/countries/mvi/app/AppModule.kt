@@ -1,14 +1,13 @@
 package com.jurcikova.ivet.countries.mvi.app
 
 import android.app.Application
-import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory
 import com.jurcikova.ivet.countries.mvi.business.api.CountryApi
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountrySearchInteractor
 import com.jurcikova.ivet.countries.mvi.business.repository.CountryRepository
 import com.jurcikova.ivet.countries.mvi.business.repository.CountryRepositoryImpl
-import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.strv.ktools.DIModule
@@ -16,7 +15,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-
 
 class AppModule(private val application: Application) : DIModule() {
 
@@ -37,7 +35,7 @@ class AppModule(private val application: Application) : DIModule() {
                 .baseUrl("https://restcountries.eu/rest/v2/")
                 .client(okHttpClient)
                 .addConverterFactory(MoshiConverterFactory.create(moshi))
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addCallAdapterFactory(CoroutineCallAdapterFactory())
                 .build()
     }
 
@@ -46,7 +44,6 @@ class AppModule(private val application: Application) : DIModule() {
 
         onProvideApi()
         onProvideRepo()
-        onProvideAdapters()
         onProvideInteractors()
     }
 
@@ -54,12 +51,6 @@ class AppModule(private val application: Application) : DIModule() {
         provideSingleton { CountryListInteractor() }
         provideSingleton { CountrySearchInteractor() }
         provideSingleton { CountryDetailInteractor() }
-    }
-
-    private fun onProvideAdapters() {
-        provide {
-            CountryAdapter()
-        }
     }
 
     private fun onProvideRepo() {
