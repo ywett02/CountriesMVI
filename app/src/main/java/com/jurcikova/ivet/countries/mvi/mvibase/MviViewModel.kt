@@ -1,7 +1,7 @@
 package com.jurcikova.ivet.countries.mvi.mvibase
 
+import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.experimental.channels.SendChannel
 
 /**
  * Object that will subscribes to a [MviView]'s [MviIntent]s,
@@ -13,7 +13,7 @@ import kotlinx.coroutines.experimental.channels.SendChannel
  */
 interface MviViewModel<I : MviIntent, S : MviViewState> {
 
-  val intentProcessor: SendChannel<I>
-
   val state: ConflatedBroadcastChannel<S>
+
+  suspend fun processIntents(channel: Channel<I>)
 }

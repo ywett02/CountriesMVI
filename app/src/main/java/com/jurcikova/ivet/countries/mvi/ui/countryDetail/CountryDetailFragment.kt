@@ -4,13 +4,12 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.widget.Toast
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
-import com.jurcikova.ivet.countries.mvi.common.onClick
+import com.jurcikova.ivet.countries.mvi.common.setOnClick
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
-import com.strv.ktools.logMe
+import com.strv.ktools.logD
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.channels.actor
 import kotlinx.coroutines.experimental.channels.consume
 import kotlinx.coroutines.experimental.launch
 
@@ -22,20 +21,13 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
 
     override val binding: FragmentCountryDetailBinding by BindFragment(R.layout.fragment_country_detail)
 
-    override val intents = actor<CountryDetailIntent> {
-        for (intent in channel) {
-            intent.logMe()
-            viewModel.intentProcessor.send(intent)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         launch(UI, parent = job) {
             viewModel.state.consume {
                 for (state in this) {
-                    state.logMe()
+                    logD("state: $state")
                     render(state)
                 }
             }
@@ -44,12 +36,16 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
         setupIntents()
     }
 
+    override fun startStream() {
+        launch(UI, parent = job) { viewModel.processIntents(intents) }
+    }
+
     override fun setupIntents() {
         launch(UI, parent = job) {
             intents.send(CountryDetailIntent.InitialIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName))
         }
 
-        binding.fabAdd.onClick {
+        binding.fabAdd.setOnClick(job) {
             viewModel.state.value.let {
                 if (it.isFavorite) intents.send(CountryDetailIntent.RemoveFromFavoriteIntent(it.country!!.name))
                 else intents.send(CountryDetailIntent.AddToFavoriteIntent(it.country!!.name))

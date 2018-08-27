@@ -1,16 +1,18 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
+import com.jurcikova.ivet.countries.mvi.common.consumeEach
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
 import com.strv.ktools.inject
-import com.strv.ktools.logMe
-import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.experimental.channels.actor
-import kotlinx.coroutines.experimental.channels.consume
+import com.strv.ktools.logD
+import kotlinx.coroutines.experimental.channels.*
 
 class CountryDetailViewModel : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
 
     private val countryDetailInteractor by inject<CountryDetailInteractor>()
+    private var processedInitialIntent = false
+
+    override val state = ConflatedBroadcastChannel(CountryDetailViewState.idle())
 
     override fun reducer(previousState: CountryDetailViewState, result: CountryDetailResult) =
             when (result) {
@@ -33,39 +35,34 @@ class CountryDetailViewModel : BaseViewModel<CountryDetailIntent, CountryDetailA
                 }
             }
 
-    override val intentProcessor = actor<CountryDetailIntent> {
-        var containsInitialIntent = false
-
-        for (intent in channel) {
-            if (intent is CountryDetailIntent.InitialIntent && !containsInitialIntent) {
-                containsInitialIntent = true
-                actions.send(actionFromIntent(intent))
-            } else if (intent !is CountryDetailIntent.InitialIntent) {
-                actions.send(actionFromIntent(intent))
-            }
-        }
-    }
-
-    override val actions = actor<CountryDetailAction> {
-        for (action in channel) {
-            action.logMe()
-
-            countryDetailInteractor.processAction(action).consume {
-                for (result in this) {
-                    result.logMe()
+    override suspend fun processIntents(channel: Channel<CountryDetailIntent>) {
+        channel
+                .filter { intent ->
+                    intentFilter(intent)
+                }
+                .map { intent ->
+                    logD("intent: $intent")
+                    actionFromIntent(intent)
+                }
+                .flatMap { action ->
+                    logD("action: $action")
+                    countryDetailInteractor.processAction(action)
+                }.consumeEach { result ->
+                    logD("result: $result")
                     state.offer(reducer(state.value, result))
                 }
+    }
+
+    override fun actionFromIntent(intent: CountryDetailIntent): CountryDetailAction =
+            when (intent) {
+                is CountryDetailIntent.InitialIntent -> CountryDetailAction.LoadCountryDetailAction(intent.countryName)
+                is CountryDetailIntent.AddToFavoriteIntent -> CountryDetailAction.AddToFavoriteAction(intent.countryName)
+                is CountryDetailIntent.RemoveFromFavoriteIntent -> CountryDetailAction.RemoveFromFavoriteAction(intent.countryName)
             }
-        }
-    }
 
-    override val state = ConflatedBroadcastChannel(CountryDetailViewState.idle())
-
-    override fun actionFromIntent(intent: CountryDetailIntent): CountryDetailAction {
-        return when (intent) {
-            is CountryDetailIntent.InitialIntent -> CountryDetailAction.LoadCountryDetailAction(intent.countryName)
-            is CountryDetailIntent.AddToFavoriteIntent -> CountryDetailAction.AddToFavoriteAction(intent.countryName)
-            is CountryDetailIntent.RemoveFromFavoriteIntent -> CountryDetailAction.RemoveFromFavoriteAction(intent.countryName)
-        }
-    }
+    private fun intentFilter(intent: CountryDetailIntent): Boolean =
+            if (intent is CountryDetailIntent.InitialIntent && !processedInitialIntent) {
+                processedInitialIntent = true
+                true
+            } else !(intent is CountryDetailIntent.InitialIntent && processedInitialIntent)
 }

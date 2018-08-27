@@ -2,12 +2,8 @@ package com.jurcikova.ivet.countries.mvi.ui
 
 import android.arch.lifecycle.ViewModel
 import com.jurcikova.ivet.countries.mvi.mvibase.*
-import com.jurcikova.ivet.countries.mvi.mvibase.MviIntent
-import kotlinx.coroutines.experimental.channels.SendChannel
 
 abstract class BaseViewModel<I : MviIntent, A : MviAction, R : MviResult, S : MviViewState> : ViewModel(), MviViewModel<I, S> {
-
-    protected abstract val actions: SendChannel<A>
 
     /**
      * The Reducer is where [MviViewState], that the [MviView] will use to
@@ -23,10 +19,4 @@ abstract class BaseViewModel<I : MviIntent, A : MviAction, R : MviResult, S : Mv
      * Used to decouple the UI and the business logic to allow easy testings and reusability.
      */
     protected abstract fun actionFromIntent(intent: I): A
-
-    override fun onCleared() {
-        intentProcessor.close()
-        actions.close()
-        state.close()
-    }
 }

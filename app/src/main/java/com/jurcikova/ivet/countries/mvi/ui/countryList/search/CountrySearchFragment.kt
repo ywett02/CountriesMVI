@@ -13,10 +13,9 @@ import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountrySearchBinding
-import com.strv.ktools.logMe
+import com.strv.ktools.logD
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.channels.actor
 import kotlinx.coroutines.experimental.channels.consume
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
@@ -35,26 +34,23 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
 
     override val binding: FragmentCountrySearchBinding by BindFragment(R.layout.fragment_country_search)
 
-    override val intents = actor<CountrySearchIntent> {
-        for (intent in channel) {
-            intent.logMe()
-            viewModel.intentProcessor.send(intent)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         launch(UI, parent = job) {
             viewModel.state.consume {
                 for (state in this) {
-                    state.logMe()
+                    logD("state: $state")
                     render(state)
                 }
             }
         }
 
         setupIntents()
+    }
+
+    override fun startStream() {
+        launch(UI, parent = job) { viewModel.processIntents(intents) }
     }
 
     override fun setupIntents() {

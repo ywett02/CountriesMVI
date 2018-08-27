@@ -12,9 +12,8 @@ import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryListBinding
-import com.strv.ktools.logMe
+import com.strv.ktools.logD
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.channels.actor
 import kotlinx.coroutines.experimental.channels.consume
 import kotlinx.coroutines.experimental.launch
 
@@ -30,14 +29,6 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         ViewModelProviders.of(this).get(CountryListViewModel::class.java)
     }
 
-    override val intents = actor<CountryListIntent> {
-        for (intent in channel) {
-            intent.logMe()
-
-            viewModel.intentProcessor.send(intent)
-        }
-    }
-
     override val binding: FragmentCountryListBinding by BindFragment(R.layout.fragment_country_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,18 +37,16 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         launch(UI, parent = job) {
             viewModel.state.consume {
                 for (state in this) {
-                    state.logMe()
+                    logD("state: $state")
                     render(state)
                 }
             }
         }
-
-        setupIntents()
     }
 
     override fun setupIntents() {
         launch(UI, parent = job) {
-            intents.offer(CountryListIntent.InitialIntent)
+            intents.send(CountryListIntent.InitialIntent)
         }
 
         binding.swiperefresh.setOnRefreshListener {
@@ -65,6 +54,10 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
                 intents.send(CountryListIntent.SwipeToRefresh)
             }
         }
+    }
+
+    override fun startStream() {
+        launch(UI, parent = job) { viewModel.processIntents(intents) }
     }
 
     override fun initViews() {

@@ -5,7 +5,6 @@ import com.jurcikova.ivet.countries.mvi.mvibase.MviInteractor
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult
 import com.strv.ktools.inject
-import com.strv.ktools.logMe
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.channels.produce
 import retrofit2.HttpException
@@ -14,15 +13,12 @@ class CountrySearchInteractor : MviInteractor<CountrySearchAction, CountrySearch
 
     private val countryRepository by inject<CountryRepository>()
 
-    override fun processAction(action: CountrySearchAction): ReceiveChannel<CountrySearchResult> {
-        action.logMe()
-
-        when (action) {
-            is CountrySearchAction.LoadCountriesByNameAction -> {
-                return produceSearchCountriesResult(action.searchQuery)
+    override suspend fun processAction(action: CountrySearchAction): ReceiveChannel<CountrySearchResult> =
+            when (action) {
+                is CountrySearchAction.LoadCountriesByNameAction -> {
+                    produceSearchCountriesResult(action.searchQuery)
+                }
             }
-        }
-    }
 
     private fun produceSearchCountriesResult(query: String) = produce<CountrySearchResult> {
         if (query.isBlank()) {

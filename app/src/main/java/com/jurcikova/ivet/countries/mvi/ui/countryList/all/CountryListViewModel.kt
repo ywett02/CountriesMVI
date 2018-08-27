@@ -1,20 +1,22 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.all
 
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor
+import com.jurcikova.ivet.countries.mvi.common.consumeEach
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.SwipeToRefresh
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.LoadCountriesResult
 import com.strv.ktools.inject
-import com.strv.ktools.logMe
-import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.experimental.channels.actor
-import kotlinx.coroutines.experimental.channels.consume
+import com.strv.ktools.logD
+import kotlinx.coroutines.experimental.channels.*
 
 class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
 
     private val countryListInteractor by inject<CountryListInteractor>()
+    private var processedInitialIntent = false
+
+    override val state = ConflatedBroadcastChannel(CountryListViewState.idle())
 
     override fun reducer(previousState: CountryListViewState, result: CountryListResult) =
             when (result) {
@@ -36,38 +38,34 @@ class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction,
                 }
             }
 
-    override val intentProcessor = actor<CountryListIntent> {
-        var containsInitialIntent = false
-
-        for (intent in channel) {
-            if (intent === InitialIntent && !containsInitialIntent) {
-                containsInitialIntent = true
-                actions.send(actionFromIntent(intent))
-            } else if (intent !== CountryListIntent.InitialIntent) {
-                actions.send(actionFromIntent(intent))
-            }
-        }
-    }
-
-    override val actions = actor<CountryListAction> {
-        for (action in channel) {
-            action.logMe()
-
-            countryListInteractor.processAction(action).consume {
-                for (result in this) {
-                    result.logMe()
+    override suspend fun processIntents(channel: Channel<CountryListIntent>) {
+        channel
+                .filter { intent ->
+                    intentFilter(intent)
+                }
+                .map { intent ->
+                    logD("intent: $intent")
+                    actionFromIntent(intent)
+                }
+                .flatMap { action ->
+                    logD("action: $action")
+                    countryListInteractor.processAction(action)
+                }.consumeEach { result ->
+                    logD("result: $result")
                     state.offer(reducer(state.value, result))
                 }
+    }
+
+    override fun actionFromIntent(intent: CountryListIntent) =
+            when (intent) {
+                is InitialIntent -> LoadCountriesAction(false)
+                is SwipeToRefresh -> LoadCountriesAction(true)
             }
-        }
-    }
 
-    override val state = ConflatedBroadcastChannel(CountryListViewState.idle())
+    private fun intentFilter(intent: CountryListIntent): Boolean =
+            if (intent is InitialIntent && !processedInitialIntent) {
+                processedInitialIntent = true
+                true
+            } else !(intent is InitialIntent && processedInitialIntent)
 
-    override fun actionFromIntent(intent: CountryListIntent): CountryListAction {
-        return when (intent) {
-            is InitialIntent -> LoadCountriesAction(false)
-            is SwipeToRefresh -> LoadCountriesAction(true)
-        }
-    }
 }

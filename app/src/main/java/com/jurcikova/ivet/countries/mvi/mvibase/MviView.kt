@@ -1,6 +1,6 @@
 package com.jurcikova.ivet.countries.mvi.mvibase
 
-import kotlinx.coroutines.experimental.channels.SendChannel
+import kotlinx.coroutines.experimental.channels.Channel
 
 /**
  * Object representing a UI that will
@@ -12,11 +12,11 @@ import kotlinx.coroutines.experimental.channels.SendChannel
  */
 interface MviView<I : MviIntent, in S : MviViewState> {
 
-  val intents: SendChannel<I>
+    val intents: Channel<I>
 
-  /**
-   * Entry point for the [MviView] to render itself based on a [MviViewState].
-   * Reflects [MviViewState] to the screen
-   */
-  fun render(state: S)
+    /**
+     * Entry point for the [MviView] to render itself based on a [MviViewState].
+     * Reflects [MviViewState] to the screen
+     */
+    fun render(state: S)
 }
