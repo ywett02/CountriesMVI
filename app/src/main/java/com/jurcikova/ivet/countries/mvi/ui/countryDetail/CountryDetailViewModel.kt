@@ -5,16 +5,13 @@ import androidx.lifecycle.LiveDataReactiveStreams
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
 import com.jurcikova.ivet.countries.mvi.common.notOfType
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
-import com.strv.ktools.inject
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 
-class CountryDetailViewModel : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
-
-    private val countryDetailInteractor by inject<CountryDetailInteractor>()
+class CountryDetailViewModel(countryDetailInteractor: CountryDetailInteractor) : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
 
     private val intentFilter: ObservableTransformer<CountryDetailIntent, CountryDetailIntent>
         get() = ObservableTransformer { intents ->

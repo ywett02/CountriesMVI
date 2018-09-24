@@ -2,7 +2,6 @@ package com.jurcikova.ivet.countries.mvi.business.repository
 
 import com.jurcikova.ivet.countries.mvi.business.api.CountryApi
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
-import com.strv.ktools.inject
 import io.reactivex.Single
 
 interface CountryRepository {
@@ -15,9 +14,7 @@ interface CountryRepository {
 
 }
 
-class CountryRepositoryImpl() : CountryRepository {
-
-    private val countryService by inject<CountryApi>()
+class CountryRepositoryImpl(val countryService: CountryApi) : CountryRepository {
 
     override fun getCountry(countryName: String): Single<Country> = countryService.getCountriesByName(countryName).map {
         it.first()

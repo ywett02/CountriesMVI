@@ -9,16 +9,13 @@ import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.Loa
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.SwipeToRefresh
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.LoadCountriesResult
-import com.strv.ktools.inject
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 
-class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
-
-    private val countryListInteractor by inject<CountryListInteractor>()
+class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
 
     /**
      * take only the first ever InitialIntent and all intents of other types

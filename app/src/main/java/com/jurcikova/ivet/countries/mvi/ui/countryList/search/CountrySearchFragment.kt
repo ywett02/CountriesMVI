@@ -3,7 +3,6 @@ package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.widget.RxSearchView
@@ -12,18 +11,17 @@ import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountrySearchBinding
-import com.strv.ktools.inject
 import com.strv.ktools.logD
 import io.reactivex.Observable
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
 class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, CountrySearchIntent, CountrySearchViewState>() {
 
     private val adapter by inject<CountryAdapter>()
 
-    private val viewModel: CountrySearchViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProviders.of(this).get(CountrySearchViewModel::class.java)
-    }
+    private val countrySearchViewModel: CountrySearchViewModel by viewModel()
 
     private val searchIntent by lazy {
         RxSearchView.queryTextChanges(binding.searchView)
@@ -43,7 +41,7 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.states().observe(this, Observer { state ->
+        countrySearchViewModel.states().observe(this, Observer { state ->
             logD("state: Search $state")
             render(state!!)
         })
@@ -65,7 +63,7 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
 
     override fun startStream() {
         // Pass the UI's intents to the ViewModel
-        viewModel.processIntents(intents())
+        countrySearchViewModel.processIntents(intents())
     }
 
     private fun setupListView() {

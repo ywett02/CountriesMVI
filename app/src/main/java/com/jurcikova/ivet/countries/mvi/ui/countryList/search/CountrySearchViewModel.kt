@@ -4,14 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.LiveDataReactiveStreams
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountrySearchInteractor
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
-import com.strv.ktools.inject
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 
-class CountrySearchViewModel : BaseViewModel<CountrySearchIntent, CountrySearchAction, CountrySearchResult, CountrySearchViewState>() {
-    private val countrySearchInteractor by inject<CountrySearchInteractor>()
+class CountrySearchViewModel(countrySearchInteractor: CountrySearchInteractor) : BaseViewModel<CountrySearchIntent, CountrySearchAction, CountrySearchResult, CountrySearchViewState>() {
 
     override val reducer = BiFunction { previousState: CountrySearchViewState, result: CountrySearchResult ->
         when (result) {

@@ -5,16 +5,13 @@ import com.jurcikova.ivet.countries.mvi.common.pairWithDelay
 import com.jurcikova.ivet.countries.mvi.mvibase.MviInteractor
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailAction
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailResult
-import com.strv.ktools.inject
 import com.strv.ktools.logD
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-class CountryDetailInteractor : MviInteractor<CountryDetailAction, CountryDetailResult> {
-
-    private val countryRepository by inject<CountryRepository>()
+class CountryDetailInteractor(val countryRepository: CountryRepository) : MviInteractor<CountryDetailAction, CountryDetailResult> {
 
     override val actionProcessor =
             ObservableTransformer<CountryDetailAction, CountryDetailResult> { actions ->

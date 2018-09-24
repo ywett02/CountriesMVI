@@ -5,16 +5,13 @@ import com.jurcikova.ivet.countries.mvi.business.repository.CountryRepository
 import com.jurcikova.ivet.countries.mvi.mvibase.MviInteractor
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult
-import com.strv.ktools.inject
 import com.strv.ktools.logD
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-class CountrySearchInteractor : MviInteractor<CountrySearchAction, CountrySearchResult> {
-
-    private val countryRepository by inject<CountryRepository>()
+class CountrySearchInteractor(val countryRepository: CountryRepository) : MviInteractor<CountrySearchAction, CountrySearchResult> {
 
     override val actionProcessor =
             ObservableTransformer<CountrySearchAction, CountrySearchResult> { actions ->
