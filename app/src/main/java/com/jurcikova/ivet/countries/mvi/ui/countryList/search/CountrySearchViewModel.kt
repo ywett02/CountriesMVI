@@ -1,7 +1,7 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.LiveDataReactiveStreams
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataReactiveStreams
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountrySearchInteractor
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
 import com.strv.ktools.inject

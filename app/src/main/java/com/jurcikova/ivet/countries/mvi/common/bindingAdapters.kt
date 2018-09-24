@@ -1,13 +1,13 @@
 package com.jurcikova.ivet.countries.mvi.common
 
-import android.databinding.BindingAdapter
 import android.graphics.drawable.PictureDrawable
-import android.support.v7.recyclerview.extensions.ListAdapter
-import android.support.v7.widget.RecyclerView
 import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.databinding.BindingAdapter
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.jurcikova.ivet.mvi.R
 import com.strv.ktools.logMe
 

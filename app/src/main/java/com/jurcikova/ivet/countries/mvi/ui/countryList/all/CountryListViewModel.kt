@@ -1,11 +1,9 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.all
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.LiveDataReactiveStreams
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataReactiveStreams
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor
 import com.jurcikova.ivet.countries.mvi.common.notOfType
-import com.jurcikova.ivet.countries.mvi.mvibase.MviViewModel
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
@@ -17,7 +15,6 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
-import io.reactivex.subjects.PublishSubject
 
 class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
 

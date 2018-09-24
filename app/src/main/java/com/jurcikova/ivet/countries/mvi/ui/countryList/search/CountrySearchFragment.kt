@@ -1,11 +1,11 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.widget.RxSearchView
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment

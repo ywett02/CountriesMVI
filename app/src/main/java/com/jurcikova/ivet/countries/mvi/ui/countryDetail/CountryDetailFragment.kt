@@ -1,16 +1,15 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.jakewharton.rxbinding2.view.RxView
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
-import com.strv.ktools.logMe
 import io.reactivex.Observable
 
 class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>() {
@@ -37,6 +36,7 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         viewModel.states().observe(this, Observer { state ->
             logD("state: $state")

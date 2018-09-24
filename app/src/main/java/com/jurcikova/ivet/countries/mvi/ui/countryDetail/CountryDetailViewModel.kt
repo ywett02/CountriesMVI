@@ -1,7 +1,7 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.LiveDataReactiveStreams
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataReactiveStreams
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
 import com.jurcikova.ivet.countries.mvi.common.notOfType
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
