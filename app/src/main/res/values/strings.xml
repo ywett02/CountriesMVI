@@ -8,4 +8,7 @@
     <string name="country_state_visited">Visited</string>
     <string name="country_state_unvisited">Unvisited</string>
     <string name="area">%s km\u00B2</string>
+	<string name="action_filter">filter</string>
+    <string name="action_show_all">All</string>
+    <string name="action_show_favorite">Favorite</string>
 </resources>
