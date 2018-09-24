@@ -1,7 +1,7 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
-import com.jurcikova.ivet.countries.mvi.mvibase.MviViewState
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
+import com.jurcikova.ivet.countries.mvi.mvibase.MviViewState
 
 data class CountryDetailViewState(
         val isLoading: Boolean,

@@ -5,6 +5,7 @@ import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -38,4 +39,9 @@ fun ImageView.setSvgResource(url: String?) {
                 .load(it)
                 .into(this)
     }
+}
+
+@BindingAdapter("src")
+fun ImageView.setImageRes(@DrawableRes drawableResource: Int) {
+    setImageResource(drawableResource)
 }

@@ -8,6 +8,7 @@ import com.jurcikova.ivet.countries.mvi.business.interactor.CountrySearchInterac
 import com.jurcikova.ivet.countries.mvi.business.repository.CountryRepository
 import com.jurcikova.ivet.countries.mvi.business.repository.CountryRepositoryImpl
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailViewModel
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryPropertyAdapter
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchViewModel
@@ -47,6 +48,9 @@ val appModule = module {
     }
     factory {
         CountryAdapter()
+    }
+    factory {
+        CountryPropertyAdapter()
     }
 }
 

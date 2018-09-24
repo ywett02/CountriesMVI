@@ -20,11 +20,7 @@ class CountryAdapter : ListAdapter<Country, CountryViewHolder>(CountryDiffCallba
         get() = LiveDataReactiveStreams.fromPublisher(onClickSubject.toFlowable(BackpressureStrategy.BUFFER))
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder =
-            LayoutInflater.from(parent.context).let { inflater ->
-                ItemCountryBinding.inflate(inflater, parent, false).let { itemCountryBinding ->
-                    CountryViewHolder(itemCountryBinding)
-                }
-            }
+            CountryViewHolder(ItemCountryBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
         getItem(position).let { country ->

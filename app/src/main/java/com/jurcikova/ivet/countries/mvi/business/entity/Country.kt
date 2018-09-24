@@ -1,6 +1,8 @@
 package com.jurcikova.ivet.countries.mvi.business.entity
 
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryProperty
 import com.squareup.moshi.Json
+import com.jurcikova.ivet.mvi.R
 
 data class Country(
         val name: String,
@@ -20,6 +22,15 @@ data class Country(
     val languageDescription = languages.map {
         it.name
     }.joinToString(", ")
+
+    val countryProperties = listOf(
+                CountryProperty(R.drawable.ic_capital, capital),
+                CountryProperty(R.drawable.ic_location, region, subregion),
+                CountryProperty(R.drawable.ic_people, population),
+                CountryProperty(R.drawable.ic_landscape, area),
+                CountryProperty(R.drawable.ic_currency, currrencyDescription),
+                CountryProperty(R.drawable.ic_language, languageDescription)
+        )
 }
 
 data class Currency(
