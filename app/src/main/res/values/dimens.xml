@@ -3,4 +3,5 @@
     <dimen name="space_8">8dp</dimen>
     <dimen name="space_16">16dp</dimen>
     <dimen name="icon_size">48dp</dimen>
+    <dimen name="space_12">12dp</dimen>
 </resources>

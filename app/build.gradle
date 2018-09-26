@@ -13,7 +13,7 @@ android {
     buildToolsVersion "28.0.2"
     defaultConfig {
         applicationId "com.jurcikova.ivet.countries.mvi"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"

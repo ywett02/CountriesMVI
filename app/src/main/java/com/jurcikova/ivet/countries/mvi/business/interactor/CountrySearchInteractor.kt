@@ -40,7 +40,6 @@ class CountrySearchInteractor(val countryRepository: CountryRepository) : MviInt
                         Observable.just(CountrySearchResult.LoadCountriesByNameResult.NotStarted)
                     } else {
                         countryRepository.getCountriesByName(action.searchQuery)
-                                .toObservable()
                                 .map { countries -> CountrySearchResult.LoadCountriesByNameResult.Success(countries) }
                                 .cast(CountrySearchResult.LoadCountriesByNameResult::class.java)
                                 .onErrorReturn { error ->

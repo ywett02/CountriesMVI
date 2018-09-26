@@ -19,6 +19,13 @@ fun View.setShow(show: Boolean) {
     visibility = if (show) View.VISIBLE else View.GONE
 }
 
+@BindingAdapter("invisible")
+fun View.setInvisible(invisible: Boolean) {
+    if (parent is ViewGroup)
+        TransitionManager.beginDelayedTransition(parent as ViewGroup)
+    visibility = if (invisible) View.INVISIBLE else View.VISIBLE
+}
+
 @Suppress("UNCHECKED_CAST")
 @BindingAdapter("list")
 fun <E> RecyclerView.setList(list: List<E>?) {

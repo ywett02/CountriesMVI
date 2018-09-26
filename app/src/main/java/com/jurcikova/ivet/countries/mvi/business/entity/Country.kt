@@ -1,10 +1,15 @@
 package com.jurcikova.ivet.countries.mvi.business.entity
 
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryProperty
-import com.squareup.moshi.Json
 import com.jurcikova.ivet.mvi.R
+import com.squareup.moshi.Json
 
+@Entity
 data class Country(
+        @PrimaryKey
         val name: String,
         val capital: String,
         val region: String,
@@ -13,16 +18,21 @@ data class Country(
         val area: String?,
         val currencies: List<Currency>,
         val languages: List<Languages>,
-        val flag: String
+        val flag: String,
+        var isFavorite: Boolean = false
 ) {
+
+    @Ignore
     val currrencyDescription = currencies.map {
         it.currency
     }.joinToString(", ")
 
+    @Ignore
     val languageDescription = languages.map {
         it.name
     }.joinToString(", ")
 
+    @Ignore
     val countryProperties = listOf(
                 CountryProperty(R.drawable.ic_capital, capital),
                 CountryProperty(R.drawable.ic_location, region, subregion),

@@ -10,13 +10,13 @@ sealed class CountryDetailResult : MviResult {
         object InProgress : LoadCountryDetailResult()
     }
     sealed class AddToFavoriteResult: CountryDetailResult() {
-        object Success : AddToFavoriteResult()
+        data class Success(val country: Country) : AddToFavoriteResult()
         data class Failure(val error: Throwable) : AddToFavoriteResult()
         object InProgress : AddToFavoriteResult()
         object Reset: AddToFavoriteResult()
     }
     sealed class RemoveFromFavoriteResult: CountryDetailResult() {
-        object Success : RemoveFromFavoriteResult()
+        data class Success(val country: Country) : RemoveFromFavoriteResult()
         data class Failure(val error: Throwable) : RemoveFromFavoriteResult()
         object InProgress : RemoveFromFavoriteResult()
         object Reset: RemoveFromFavoriteResult()

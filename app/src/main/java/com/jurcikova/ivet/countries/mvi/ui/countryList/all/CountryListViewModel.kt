@@ -7,8 +7,7 @@ import com.jurcikova.ivet.countries.mvi.common.notOfType
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
-import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.SwipeToRefresh
-import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.LoadCountriesResult
+import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.*
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
@@ -37,17 +36,39 @@ class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseV
                 is LoadCountriesResult.Success -> {
                     previousState.copy(
                             isLoading = false,
-                            isRefreshing = false,
-                            countries = result.countries
-
+                            countries = result.countries,
+                            error = null
                     )
                 }
-                is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, isRefreshing = false, error = result.error)
+                is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is LoadCountriesResult.InProgress -> {
-                    if (result.isRefreshing) {
-                        previousState.copy(isLoading = false, isRefreshing = true)
-                    } else previousState.copy(isLoading = true, isRefreshing = false)
+                    previousState.copy(isLoading = true)
                 }
+            }
+            is AddToFavoriteResult -> when (result) {
+                is AddToFavoriteResult.Success -> previousState.copy(
+                        countries = previousState.countries.map {
+                            if (it.name == result.countryName) {
+                                it.isFavorite = true
+                            }
+                            it
+                        },
+                        isLoading = false, error = null, message = CountryListViewState.MessageType.AddToFavorite)
+                is AddToFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                is AddToFavoriteResult.InProgress -> previousState.copy(isLoading = true)
+                is AddToFavoriteResult.Reset -> previousState.copy(message = null)
+            }
+            is RemoveFromFavoriteResult -> when (result) {
+                is RemoveFromFavoriteResult.Success -> previousState.copy(
+                        countries = previousState.countries.map {
+                            if (it.name == result.countryName) {
+                                it.isFavorite = false
+                            }
+                            it
+                        }, isLoading = false, error = null, message = CountryListViewState.MessageType.RemoveFromFavorite)
+                is RemoveFromFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                is RemoveFromFavoriteResult.InProgress -> previousState.copy(isLoading = true)
+                is RemoveFromFavoriteResult.Reset -> previousState.copy(message = null)
             }
         }
     }
@@ -88,8 +109,10 @@ class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseV
 
     override fun actionFromIntent(intent: CountryListIntent): CountryListAction {
         return when (intent) {
-            is InitialIntent -> LoadCountriesAction(false)
-            is SwipeToRefresh -> LoadCountriesAction(true)
+            is InitialIntent -> LoadCountriesAction()
+            is CountryListIntent.ChangeFilterIntent -> LoadCountriesAction(intent.filterType)
+            is CountryListIntent.AddToFavoriteIntent -> CountryListAction.AddToFavoriteAction(intent.countryName)
+            is CountryListIntent.RemoveFromFavoriteIntent -> CountryListAction.RemoveFromFavoriteAction(intent.countryName)
         }
     }
 }

@@ -3,6 +3,7 @@ package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.view.RxView
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
@@ -10,11 +11,14 @@ import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
 import io.reactivex.Observable
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>() {
 
     private val countryDetailViewModel: CountryDetailViewModel by viewModel()
+
+    private val adapter by inject<CountryPropertyAdapter>()
 
     private val initialIntent by lazy {
         Observable.just(CountryDetailIntent.InitialIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName) as CountryDetailIntent)
@@ -22,9 +26,11 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
 
     private val favoriteButtonClickedIntent by lazy {
         RxView.clicks(binding.fabAdd).flatMap {
-            countryDetailViewModel.statesStream().map {
-                if (!it.isFavorite) CountryDetailIntent.AddToFavoriteIntent(it.country!!.name) else {
-                    CountryDetailIntent.RemoveFavoriteIntent(it.country!!.name)
+            countryDetailViewModel.statesStream().map { state ->
+                if (state.country?.isFavorite != true) {
+                    CountryDetailIntent.AddToFavoriteIntent(state.country!!.name)
+                } else {
+                    CountryDetailIntent.RemoveFavoriteIntent(state.country.name)
                 }
             }.take(1)
         }
@@ -44,6 +50,7 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     }
 
     override fun initViews() {
+        setupListView()
     }
 
     override fun startStream() {
@@ -59,12 +66,17 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
         binding.countryDetailViewState = state
 
         if (state.showMessage) {
-            showMessage(state.isFavorite)
+            showMessage(state.country?.isFavorite ?: false)
         }
 
         state.error?.let {
             showErrorMessage(it)
         }
+    }
+
+    private fun setupListView() {
+        binding.rvProperties.layoutManager = LinearLayoutManager(activity)
+        binding.rvProperties.adapter = adapter
     }
 
     private fun showMessage(isFavorite: Boolean) {

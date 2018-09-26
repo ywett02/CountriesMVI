@@ -15,17 +15,24 @@ import io.reactivex.subjects.PublishSubject
 class CountryAdapter : ListAdapter<Country, CountryViewHolder>(CountryDiffCallback()) {
 
     private val onClickSubject = PublishSubject.create<Country>()
+    private val onFavoriteButtonClickSubject = PublishSubject.create<Country>()
 
     val countryClickObservable: LiveData<Country>
         get() = LiveDataReactiveStreams.fromPublisher(onClickSubject.toFlowable(BackpressureStrategy.BUFFER))
+
+    val favoriteButtonClickObservable: LiveData<Country>
+        get() = LiveDataReactiveStreams.fromPublisher(onFavoriteButtonClickSubject.toFlowable(BackpressureStrategy.BUFFER))
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder =
             CountryViewHolder(ItemCountryBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
         getItem(position).let { country ->
-            holder.itemBinding.root.setOnClickListener {
+            holder.itemBinding.llContent.setOnClickListener {
                 onClickSubject.onNext(country)
+            }
+            holder.itemBinding.ivFavorite.setOnClickListener {
+                onFavoriteButtonClickSubject.onNext(country)
             }
             holder.bind(country)
         }
