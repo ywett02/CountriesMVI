@@ -25,6 +25,7 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         Observable.just(CountryListIntent.InitialIntent)
     }
 
+    private val refreshIntentPublisher = PublishSubject.create<CountryListIntent.RefreshIntent>()
     private val changeFilterPublisher = PublishSubject.create<CountryListIntent.ChangeFilterIntent>()
     private val addToFavoriteIntentPublisher = PublishSubject.create<CountryListIntent.AddToFavoriteIntent>()
     private val removeFromFavoriteIntentPublisher = PublishSubject.create<CountryListIntent.RemoveFromFavoriteIntent>()
@@ -59,13 +60,21 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        // conflicting with the initial intent but needed when coming back from the
+        // CountryDetail fragment to refresh the list.
+        refreshIntentPublisher.onNext(CountryListIntent.RefreshIntent)
+    }
+
     override fun initViews() {
         setupListView()
     }
 
     override fun intents() = Observable.merge(
             initialIntent,
-            changeFilterIntent(),
+            refreshIntent(),
+        //    changeFilterIntent(),
             addToFavoriteIntentPublisher,
             removeFromFavoriteIntentPublisher
     )
@@ -107,6 +116,9 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
 
     private fun changeFilterIntent(): Observable<CountryListIntent.ChangeFilterIntent> =
             changeFilterPublisher
+
+    private fun refreshIntent(): Observable<CountryListIntent.RefreshIntent> =
+            refreshIntentPublisher
 
     private fun showFilteringPopUpMenu(): Boolean =
             PopupMenu(activity, activity?.findViewById(R.id.menu_filter)).let { menu ->

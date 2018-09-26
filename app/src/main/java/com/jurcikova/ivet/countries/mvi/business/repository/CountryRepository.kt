@@ -13,7 +13,7 @@ interface CountryRepository {
 
     fun getCountry(countryName: String): Observable<Country>
 
-    fun getCountries(filterType: FilterType): Observable<List<Country>>
+    fun getCountries(isRefresh: Boolean = false, filterType: FilterType): Observable<List<Country>>
 
     fun getFavoriteCountries(): Single<List<Country>>
 
@@ -45,9 +45,9 @@ class CountryRepositoryImpl(val countryService: CountryApi, val countryDao: Coun
             )
                     .debounce(400, TimeUnit.MILLISECONDS)
 
-    override fun getCountries(filterType: FilterType): Observable<List<Country>> =
+    override fun getCountries(isRefresh: Boolean, filterType: FilterType): Observable<List<Country>> =
             when (filterType) {
-                is FilterType.All -> getAllCountries()
+                is FilterType.All -> if (isRefresh) getCountriesFromDb() else getAllCountries()
                 is FilterType.Favorite -> getFavoriteCountries().toObservable()
             }
 

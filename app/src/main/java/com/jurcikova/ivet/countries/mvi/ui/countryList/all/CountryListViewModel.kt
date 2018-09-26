@@ -6,7 +6,7 @@ import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteracto
 import com.jurcikova.ivet.countries.mvi.common.notOfType
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
-import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
+import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.*
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.*
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
@@ -20,12 +20,26 @@ class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseV
      * take only the first ever InitialIntent and all intents of other types
      * to avoid reloading data on config changes
      */
-    private val intentFilter: ObservableTransformer<CountryListIntent, CountryListIntent>
+    private val initialIntentFilter: ObservableTransformer<CountryListIntent, CountryListIntent>
         get() = ObservableTransformer { intents ->
             intents.publish { selected ->
                 Observable.merge(
-                        selected.ofType(InitialIntent::class.java).take(1),
+                       selected.ofType(InitialIntent::class.java).take(1),
                         selected.notOfType(InitialIntent::class.java)
+                )
+            }
+        }
+
+    /**
+     * skip the first RefreshIntent to avoid duplication of the InitialIntent
+     * usable when you return back from the CountryDetailFragment
+     */
+    private val refreshIntentFilter: ObservableTransformer<CountryListIntent, CountryListIntent>
+        get() = ObservableTransformer { intents ->
+            intents.publish { selected ->
+                Observable.merge(
+                         selected.ofType(RefreshIntent::class.java).skip(1),
+                          selected.notOfType(RefreshIntent::class.java)
                 )
             }
         }
@@ -42,7 +56,7 @@ class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseV
                 }
                 is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is LoadCountriesResult.InProgress -> {
-                    previousState.copy(isLoading = true)
+                    previousState.copy(isLoading = !result.isRefresh)
                 }
             }
             is AddToFavoriteResult -> when (result) {
@@ -74,7 +88,8 @@ class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseV
     }
 
     override val statesObservable: Observable<CountryListViewState> = intentsSubject
-            .compose(intentFilter)
+            .compose(initialIntentFilter)
+            .compose(refreshIntentFilter)
             .map(this::actionFromIntent)
             .doOnNext { action ->
                 logD("action: $action")
@@ -110,7 +125,8 @@ class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseV
     override fun actionFromIntent(intent: CountryListIntent): CountryListAction {
         return when (intent) {
             is InitialIntent -> LoadCountriesAction()
-            is CountryListIntent.ChangeFilterIntent -> LoadCountriesAction(intent.filterType)
+            is CountryListIntent.RefreshIntent -> LoadCountriesAction(true)
+            is CountryListIntent.ChangeFilterIntent -> LoadCountriesAction(filterType = intent.filterType)
             is CountryListIntent.AddToFavoriteIntent -> CountryListAction.AddToFavoriteAction(intent.countryName)
             is CountryListIntent.RemoveFromFavoriteIntent -> CountryListAction.RemoveFromFavoriteAction(intent.countryName)
         }

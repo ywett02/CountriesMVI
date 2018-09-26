@@ -48,7 +48,7 @@ class CountryListInteractor(val countryRepository: CountryRepository) : MviInter
     private val loadCountries =
             ObservableTransformer<LoadCountriesAction, CountryListResult> { actions ->
                 actions.flatMap { action ->
-                    countryRepository.getCountries(action.filterType)
+                    countryRepository.getCountries(filterType = action.filterType)
                             // Wrap returned data into an immutable object
                             .map { countries -> LoadCountriesResult.Success(countries) }
                             .cast(LoadCountriesResult::class.java)
@@ -62,7 +62,7 @@ class CountryListInteractor(val countryRepository: CountryRepository) : MviInter
                             // doing work and waiting on a response.
                             // We emit it after observing on the UI thread to allow the event to be emitted
                             // on the current frame and avoid jank.
-                            .startWith(LoadCountriesResult.InProgress)
+                            .startWith(LoadCountriesResult.InProgress(action.isRefresh))
                 }
             }
 
