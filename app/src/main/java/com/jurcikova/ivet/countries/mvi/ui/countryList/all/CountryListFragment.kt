@@ -3,7 +3,6 @@ package com.jurcikova.ivet.countries.mvi.ui.countryList.all
 import android.os.Bundle
 import android.widget.PopupMenu
 import androidx.lifecycle.Observer
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,8 +47,7 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding.toolbar.let {
-            it.title = activity?.title
+        binding.bottomBar.let {
             it.inflateMenu(R.menu.menu_main)
             it.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
