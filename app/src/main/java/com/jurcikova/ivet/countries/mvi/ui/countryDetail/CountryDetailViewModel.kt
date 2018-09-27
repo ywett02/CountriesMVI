@@ -2,9 +2,10 @@ package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.LiveDataReactiveStreams
+import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
 import com.jurcikova.ivet.countries.mvi.common.notOfType
-import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
+import com.jurcikova.ivet.countries.mvi.ui.base.BaseViewModel
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
@@ -31,16 +32,16 @@ class CountryDetailViewModel(countryDetailInteractor: CountryDetailInteractor) :
                 is CountryDetailResult.LoadCountryDetailResult.InProgress -> previousState.copy(isLoading = true)
             }
             is CountryDetailResult.AddToFavoriteResult -> when (result) {
-                is CountryDetailResult.AddToFavoriteResult.Success -> previousState.copy(isLoading = false, showMessage = true, error = null)
+                is CountryDetailResult.AddToFavoriteResult.Success -> previousState.copy(isLoading = false, message = MessageType.AddToFavorite, error = null)
                 is CountryDetailResult.AddToFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is CountryDetailResult.AddToFavoriteResult.InProgress -> previousState.copy(isLoading = true)
-                is CountryDetailResult.AddToFavoriteResult.Reset -> previousState.copy(showMessage = false)
+                is CountryDetailResult.AddToFavoriteResult.Reset -> previousState.copy(message = null)
             }
             is CountryDetailResult.RemoveFromFavoriteResult -> when (result) {
-                is CountryDetailResult.RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, showMessage = true, error = null)
+                is CountryDetailResult.RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, message = MessageType.RemoveFromFavorite, error = null)
                 is CountryDetailResult.RemoveFromFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is CountryDetailResult.RemoveFromFavoriteResult.InProgress -> previousState.copy(isLoading = true)
-                is CountryDetailResult.RemoveFromFavoriteResult.Reset -> previousState.copy(showMessage = false)
+                is CountryDetailResult.RemoveFromFavoriteResult.Reset -> previousState.copy(message = null)
             }
         }
     }

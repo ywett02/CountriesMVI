@@ -7,7 +7,7 @@ sealed class CountryListResult : MviResult {
     sealed class LoadCountriesResult : CountryListResult() {
         data class Success(val countries: List<Country>, val filterType: FilterType?) : LoadCountriesResult()
         data class Failure(val error: Throwable) : LoadCountriesResult()
-       object InProgress : LoadCountriesResult()
+        data class InProgress(val isRefreshing: Boolean): LoadCountriesResult()
     }
     sealed class AddToFavoriteResult: CountryListResult() {
         object Success : AddToFavoriteResult()

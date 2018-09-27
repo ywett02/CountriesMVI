@@ -3,9 +3,10 @@ package com.jurcikova.ivet.countries.mvi.ui.countryList.all
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.LiveDataReactiveStreams
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
+import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor
 import com.jurcikova.ivet.countries.mvi.common.notOfType
-import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
+import com.jurcikova.ivet.countries.mvi.ui.base.BaseViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.*
@@ -15,7 +16,7 @@ import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 
-class CountryListViewModel(val countryListInteractor: CountryListInteractor) : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
+class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
 
     /**
      * take only the first ever InitialIntent and all intents of other types
@@ -38,6 +39,7 @@ class CountryListViewModel(val countryListInteractor: CountryListInteractor) : B
                     val filterType = result.filterType ?: previousState.filterType
                     previousState.copy(
                             isLoading = false,
+                            isRefreshing = false,
                             filterType = filterType,
                             countries = applyFilters(result.countries, filterType),
                             error = null
@@ -45,18 +47,20 @@ class CountryListViewModel(val countryListInteractor: CountryListInteractor) : B
                 }
                 is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is LoadCountriesResult.InProgress -> {
-                    previousState.copy(isLoading = true)
+                    if (result.isRefreshing) {
+                        previousState.copy(isLoading = false, isRefreshing = true)
+                    } else previousState.copy(isLoading = true, isRefreshing = false)
                 }
             }
             is AddToFavoriteResult -> when (result) {
                 is AddToFavoriteResult.Success -> previousState.copy(
-                        isLoading = false, error = null, message = CountryListViewState.MessageType.AddToFavorite)
+                        isLoading = false, error = null, message = MessageType.AddToFavorite)
                 is AddToFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is AddToFavoriteResult.InProgress -> previousState.copy(isLoading = true)
                 is AddToFavoriteResult.Reset -> previousState.copy(message = null)
             }
             is RemoveFromFavoriteResult -> when (result) {
-                is RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, error = null, message = CountryListViewState.MessageType.RemoveFromFavorite)
+                is RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, error = null, message = MessageType.RemoveFromFavorite)
                 is RemoveFromFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is RemoveFromFavoriteResult.InProgress -> previousState.copy(isLoading = true)
                 is RemoveFromFavoriteResult.Reset -> previousState.copy(message = null)
@@ -101,7 +105,8 @@ class CountryListViewModel(val countryListInteractor: CountryListInteractor) : B
 
     override fun actionFromIntent(intent: CountryListIntent): CountryListAction {
         return when (intent) {
-            is InitialIntent -> LoadCountriesAction()
+            is InitialIntent -> LoadCountriesAction(false)
+            is CountryListIntent.SwipeToRefresh -> LoadCountriesAction(true)
             is CountryListIntent.ChangeFilterIntent -> LoadCountriesAction(filterType = intent.filterType)
             is CountryListIntent.AddToFavoriteIntent -> CountryListAction.AddToFavoriteAction(intent.countryName)
             is CountryListIntent.RemoveFromFavoriteIntent -> CountryListAction.RemoveFromFavoriteAction(intent.countryName)

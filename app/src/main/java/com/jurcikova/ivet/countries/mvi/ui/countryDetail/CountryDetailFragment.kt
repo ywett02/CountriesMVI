@@ -1,12 +1,12 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.view.RxView
+import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
-import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
+import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
@@ -65,8 +65,8 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     override fun render(state: CountryDetailViewState) {
         binding.countryDetailViewState = state
 
-        if (state.showMessage) {
-            showMessage(state.country?.isFavorite ?: false)
+        if (state.message != null) {
+            showMessage(state.message)
         }
 
         state.error?.let {
@@ -79,15 +79,12 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
         binding.rvProperties.adapter = adapter
     }
 
-    private fun showMessage(isFavorite: Boolean) {
-        activity?.let {
-            Toast.makeText(it, "Country was marked as ${if (isFavorite) "favorite" else "not favorite"}", Toast.LENGTH_SHORT).show()
-        }
+    private fun showMessage(messageType: MessageType) {
+        showMessage("Country was " +
+                "${if (messageType is MessageType.AddToFavorite) "marked" else "unmarked"} as favorite")
     }
 
     private fun showErrorMessage(exception: Throwable) {
-        activity?.let {
-            Toast.makeText(it, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
-        }
+        showMessage(exception.localizedMessage)
     }
 }

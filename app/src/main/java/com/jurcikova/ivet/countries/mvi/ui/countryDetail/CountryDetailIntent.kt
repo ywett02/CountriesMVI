@@ -1,6 +1,6 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
-import com.jurcikova.ivet.countriesMVI.mvibase.MviIntent
+import com.jurcikova.ivet.countries.mvi.mvibase.MviIntent
 
 sealed class CountryDetailIntent: MviIntent {
     data class InitialIntent(val countryName: String): CountryDetailIntent()

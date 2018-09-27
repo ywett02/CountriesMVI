@@ -1,16 +1,15 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.jakewharton.rxbinding2.widget.RxSearchView
+import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
-import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
+import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
-import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListViewState
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountrySearchBinding
 import com.strv.ktools.logD
@@ -105,16 +104,12 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
     private fun removeFromFavoriteIntent(): Observable<CountrySearchIntent.RemoveFromFavoriteIntent> =
             removeFromFavoritePublisher
 
-    private fun showErrorMessage(exception: Throwable) {
-        activity?.let {
-            Toast.makeText(it, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
-        }
+    private fun showMessage(messageType: MessageType) {
+        showMessage("Country was " +
+                "${if (messageType is MessageType.AddToFavorite) "marked" else "unmarked"} as favorite")
     }
 
-    private fun showMessage(messageType: CountryListViewState.MessageType) {
-        activity?.let {
-            Toast.makeText(it, "Country was " +
-                    "${if (messageType is CountryListViewState.MessageType.AddToFavorite) "marked" else "unmarked"} as favorite", Toast.LENGTH_SHORT).show()
-        }
+    private fun showErrorMessage(exception: Throwable) {
+        showMessage(exception.localizedMessage)
     }
 }

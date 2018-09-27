@@ -1,6 +1,5 @@
 package com.jurcikova.ivet.countries.mvi.mvibase
 
-import com.jurcikova.ivet.countriesMVI.mvibase.MviIntent
 import io.reactivex.Observable
 
 /**

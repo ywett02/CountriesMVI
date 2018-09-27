@@ -2,15 +2,16 @@ package com.jurcikova.ivet.countries.mvi.ui.countryList.all
 
 import android.os.Bundle
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.jakewharton.rxbinding2.support.v4.widget.refreshes
+import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
-import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
+import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryListBinding
@@ -24,6 +25,13 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
 
     private val initialIntent by lazy {
         Observable.just(CountryListIntent.InitialIntent)
+    }
+
+    private val swipeToRefreshIntent by lazy {
+        binding.swiperefresh.refreshes()
+                .map {
+                    CountryListIntent.SwipeToRefresh
+                }
     }
 
     private val changeFilterPublisher = PublishSubject.create<CountryListIntent.ChangeFilterIntent>()
@@ -66,10 +74,11 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
 
     override fun intents() = Observable.merge(
             initialIntent,
+            swipeToRefreshIntent,
             changeFilterIntent(),
-            addToFavoriteIntent(),
-            removeFromFavoriteIntent()
-    )
+            addToFavoriteIntent()
+    ).mergeWith(removeFromFavoriteIntent())
+
 
     override fun render(state: CountryListViewState) {
         binding.model = state
@@ -131,16 +140,12 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
                 true
             }
 
-    private fun showMessage(messageType: CountryListViewState.MessageType) {
-        activity?.let {
-            Toast.makeText(it, "Country was " +
-                    "${if (messageType is CountryListViewState.MessageType.AddToFavorite) "marked" else "unmarked"} as favorite", Toast.LENGTH_SHORT).show()
-        }
+    private fun showMessage(messageType: MessageType) {
+        showMessage("Country was " +
+                "${if (messageType is MessageType.AddToFavorite) "marked" else "unmarked"} as favorite")
     }
 
     private fun showErrorMessage(exception: Throwable) {
-        activity?.let {
-            Toast.makeText(it, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
-        }
+        showMessage(exception.localizedMessage)
     }
 }

@@ -1,11 +1,11 @@
-package com.jurcikova.ivet.countries.mvi.ui
+package com.jurcikova.ivet.countries.mvi.ui.base
 
 import androidx.lifecycle.ViewModel
 import com.jurcikova.ivet.countries.mvi.mvibase.MviAction
 import com.jurcikova.ivet.countries.mvi.mvibase.MviResult
 import com.jurcikova.ivet.countries.mvi.mvibase.MviViewModel
 import com.jurcikova.ivet.countries.mvi.mvibase.MviViewState
-import com.jurcikova.ivet.countriesMVI.mvibase.MviIntent
+import com.jurcikova.ivet.countries.mvi.mvibase.MviIntent
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
