@@ -1,5 +1,11 @@
 package com.jurcikova.ivet.countries.mvi.common
 
+import android.app.Activity
+import androidx.fragment.app.Fragment
+import androidx.navigation.NavDirections
+import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
+import com.jurcikova.ivet.mvi.R
 import io.reactivex.Observable
 import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
@@ -25,3 +31,10 @@ fun <T> pairWithDelay(immediate: T, delayed: T): Observable<T> {
             .map { delayed }
             .startWith(immediate)
 }
+
+fun Fragment.navigate(directions: NavDirections) {
+    findNavController().navigate(directions)
+}
+
+fun Activity.findNavController(viewId: Int) =
+    Navigation.findNavController(this, R.id.my_nav_host_fragment)

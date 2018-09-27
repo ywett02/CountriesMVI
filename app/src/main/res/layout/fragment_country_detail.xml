@@ -86,6 +86,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/space_16"
                 android:src="@{countryDetailViewState.country.isFavorite ? @drawable/ic_favorite : @drawable/ic_favorite_border}"
+                app:invisible="@{countryDetailViewState.isLoading &amp;&amp; countryDetailViewState.country == null}"
                 app:layout_anchor="@id/app_bar"
                 app:layout_anchorGravity="bottom|right|end" />
 

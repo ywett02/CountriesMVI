@@ -2,12 +2,12 @@ package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 
 import android.os.Bundle
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.jakewharton.rxbinding2.widget.RxSearchView
 import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
+import com.jurcikova.ivet.countries.mvi.common.navigate
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.jurcikova.ivet.mvi.R
@@ -85,8 +85,7 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
         binding.rvCountries.adapter = adapter
 
         adapter.countryClickObservable.observe(this, Observer { country ->
-            val action = CountrySearchFragmentDirections.actionCountrySearchFragmentToCountryDetailFragment(country!!.name)
-            findNavController().navigate(action)
+            navigate(CountrySearchFragmentDirections.actionCountrySearchFragmentToCountryDetailFragment(country!!.name))
         })
 
         adapter.favoriteButtonClickObservable.observe(this, Observer {

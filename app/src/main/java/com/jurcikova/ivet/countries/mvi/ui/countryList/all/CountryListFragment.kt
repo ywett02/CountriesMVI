@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.jakewharton.rxbinding2.support.v4.widget.refreshes
 import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
+import com.jurcikova.ivet.countries.mvi.common.navigate
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.jurcikova.ivet.mvi.R
@@ -52,7 +53,7 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
             it.inflateMenu(R.menu.menu_main)
             it.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.countrySearchFragment -> NavigationUI.onNavDestinationSelected(item, Navigation.findNavController(binding.root))
+                    R.id.countrySearchFragment -> NavigationUI.onNavDestinationSelected(item, findNavController())
                     R.id.menu_filter -> {
                         showFilteringPopUpMenu()
                     }
@@ -111,8 +112,7 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         })
 
         adapter.countryClickObservable.observe(this, Observer { country ->
-            val action = CountryListFragmentDirections.actionCountryListFragmentToCountryDetailFragment(country!!.name)
-            findNavController().navigate(action)
+           navigate(CountryListFragmentDirections.actionCountryListFragmentToCountryDetailFragment(country!!.name))
         })
     }
 
