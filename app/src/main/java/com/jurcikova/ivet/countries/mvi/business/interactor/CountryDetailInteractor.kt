@@ -49,6 +49,7 @@ class CountryDetailInteractor(val countryRepository: CountryRepository) : MviInt
             ObservableTransformer<CountryDetailAction.LoadCountryDetailAction, CountryDetailResult> { actions ->
                 actions.flatMap { action ->
                     countryRepository.getCountry(action.countryName)
+                            .toObservable()
                             // Wrap returned data into an immutable object
                             .map { country -> CountryDetailResult.LoadCountryDetailResult.Success(country) }
                             .cast(CountryDetailResult.LoadCountryDetailResult::class.java)
@@ -72,14 +73,13 @@ class CountryDetailInteractor(val countryRepository: CountryRepository) : MviInt
                     Completable.fromAction {
                         countryRepository.addToFavorite(action.countryName)
                     }
-                            .andThen(countryRepository.getCountry(action.countryName))
-                            .flatMap {
-                                // Emit two events to allow the UI notification to be hidden after
-                                // some delay
-                                pairWithDelay(
-                                        CountryDetailResult.AddToFavoriteResult.Success(it),
-                                        CountryDetailResult.AddToFavoriteResult.Reset)
-                            }
+                            .andThen(
+                                    // Emit two events to allow the UI notification to be hidden after
+                                    // some delay
+                                    pairWithDelay(
+                                            CountryDetailResult.AddToFavoriteResult.Success,
+                                            CountryDetailResult.AddToFavoriteResult.Reset)
+                            )
                             .cast(CountryDetailResult::class.java)
                             .onErrorReturn { CountryDetailResult.AddToFavoriteResult.Failure(it) }
                             .subscribeOn(Schedulers.io())
@@ -94,14 +94,13 @@ class CountryDetailInteractor(val countryRepository: CountryRepository) : MviInt
                     Completable.fromAction {
                         countryRepository.removeFromFavorite(action.countryName)
                     }
-                            .andThen(countryRepository.getCountry(action.countryName))
-                            .flatMap {
-                                // Emit two events to allow the UI notification to be hidden after
-                                // some delay
-                                pairWithDelay(
-                                        CountryDetailResult.RemoveFromFavoriteResult.Success(it),
-                                        CountryDetailResult.RemoveFromFavoriteResult.Reset)
-                            }
+                            .andThen(
+                                    // Emit two events to allow the UI notification to be hidden after
+                                    // some delay
+                                    pairWithDelay(
+                                            CountryDetailResult.RemoveFromFavoriteResult.Success,
+                                            CountryDetailResult.RemoveFromFavoriteResult.Reset)
+                            )
                             .cast(CountryDetailResult::class.java)
                             .onErrorReturn { CountryDetailResult.RemoveFromFavoriteResult.Failure(it) }
                             .subscribeOn(Schedulers.io())

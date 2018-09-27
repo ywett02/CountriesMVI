@@ -5,6 +5,7 @@ import com.jurcikova.ivet.countries.mvi.business.entity.Country
 
 data class CountryListViewState(val isLoading: Boolean,
                                 val countries: List<Country>,
+                                val filterType: FilterType,
                                 val error: Throwable?,
                                 val message: MessageType?) : MviViewState {
     companion object {
@@ -12,6 +13,7 @@ data class CountryListViewState(val isLoading: Boolean,
             return CountryListViewState(
                     isLoading = false,
                     countries = emptyList(),
+                    filterType = FilterType.All,
                     error = null,
                     message = null
             )

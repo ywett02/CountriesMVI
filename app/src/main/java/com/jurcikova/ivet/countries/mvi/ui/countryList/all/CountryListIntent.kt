@@ -4,7 +4,6 @@ import com.jurcikova.ivet.countriesMVI.mvibase.MviIntent
 
 sealed class CountryListIntent: MviIntent {
     object InitialIntent : CountryListIntent()
-    object RefreshIntent: CountryListIntent()
     data class ChangeFilterIntent(val filterType: FilterType): CountryListIntent()
     data class AddToFavoriteIntent(val countryName: String): CountryListIntent()
     data class RemoveFromFavoriteIntent(val countryName: String): CountryListIntent()

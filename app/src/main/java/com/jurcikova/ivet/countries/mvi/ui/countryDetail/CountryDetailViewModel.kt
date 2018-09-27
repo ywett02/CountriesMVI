@@ -31,13 +31,13 @@ class CountryDetailViewModel(countryDetailInteractor: CountryDetailInteractor) :
                 is CountryDetailResult.LoadCountryDetailResult.InProgress -> previousState.copy(isLoading = true)
             }
             is CountryDetailResult.AddToFavoriteResult -> when (result) {
-                is CountryDetailResult.AddToFavoriteResult.Success -> previousState.copy(country = result.country, isLoading = false, showMessage = true, error = null)
+                is CountryDetailResult.AddToFavoriteResult.Success -> previousState.copy(isLoading = false, showMessage = true, error = null)
                 is CountryDetailResult.AddToFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is CountryDetailResult.AddToFavoriteResult.InProgress -> previousState.copy(isLoading = true)
                 is CountryDetailResult.AddToFavoriteResult.Reset -> previousState.copy(showMessage = false)
             }
             is CountryDetailResult.RemoveFromFavoriteResult -> when (result) {
-                is CountryDetailResult.RemoveFromFavoriteResult.Success -> previousState.copy(country = result.country, isLoading = false, showMessage = true, error = null)
+                is CountryDetailResult.RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, showMessage = true, error = null)
                 is CountryDetailResult.RemoveFromFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is CountryDetailResult.RemoveFromFavoriteResult.InProgress -> previousState.copy(isLoading = true)
                 is CountryDetailResult.RemoveFromFavoriteResult.Reset -> previousState.copy(showMessage = false)

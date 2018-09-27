@@ -48,9 +48,10 @@ class CountryListInteractor(val countryRepository: CountryRepository) : MviInter
     private val loadCountries =
             ObservableTransformer<LoadCountriesAction, CountryListResult> { actions ->
                 actions.flatMap { action ->
-                    countryRepository.getCountries(filterType = action.filterType)
+                    countryRepository.getAllCountries()
+                            .toObservable()
                             // Wrap returned data into an immutable object
-                            .map { countries -> LoadCountriesResult.Success(countries) }
+                            .map { countries -> LoadCountriesResult.Success(countries, action.filterType) }
                             .cast(LoadCountriesResult::class.java)
                             // Wrap any error into an immutable object and pass it down the stream
                             // without crashing.
@@ -62,7 +63,7 @@ class CountryListInteractor(val countryRepository: CountryRepository) : MviInter
                             // doing work and waiting on a response.
                             // We emit it after observing on the UI thread to allow the event to be emitted
                             // on the current frame and avoid jank.
-                            .startWith(LoadCountriesResult.InProgress(action.isRefresh))
+                            .startWith(LoadCountriesResult.InProgress)
                 }
             }
 
@@ -76,7 +77,7 @@ class CountryListInteractor(val countryRepository: CountryRepository) : MviInter
                                     // Emit two events to allow the UI notification to be hidden after
                                     // some delay
                                     pairWithDelay(
-                                            CountryListResult.AddToFavoriteResult.Success(action.countryName),
+                                            CountryListResult.AddToFavoriteResult.Success,
                                             CountryListResult.AddToFavoriteResult.Reset)
                             )
                             .cast(CountryListResult::class.java)
@@ -97,7 +98,7 @@ class CountryListInteractor(val countryRepository: CountryRepository) : MviInter
                                     // Emit two events to allow the UI notification to be hidden after
                                     // some delay
                                     pairWithDelay(
-                                            CountryListResult.RemoveFromFavoriteResult.Success(action.countryName),
+                                            CountryListResult.RemoveFromFavoriteResult.Success,
                                             CountryListResult.RemoveFromFavoriteResult.Reset)
                             )
                             .cast(CountryListResult::class.java)

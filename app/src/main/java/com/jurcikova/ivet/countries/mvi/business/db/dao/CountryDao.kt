@@ -2,7 +2,7 @@ package com.jurcikova.ivet.countries.mvi.business.db.dao
 
 import androidx.room.*
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
-import io.reactivex.Single
+import io.reactivex.Flowable
 
 @Dao
 interface CountryDao {
@@ -17,19 +17,16 @@ interface CountryDao {
     fun updateCountry(country: Country)
 
     @Query("SELECT * FROM country WHERE name = :name")
-    fun getCountry(name: String): Single<Country>
+    fun getCountry(name: String): Flowable<Country>
 
     @Query("SELECT * FROM country WHERE name = :name")
     fun getCountrySync(name: String): Country?
 
-    @Query("SELECT * FROM country")
-    fun getAll(): Single<List<Country>>
+    @Query("SELECT * FROM country order by name")
+    fun getAll(): Flowable<List<Country>>
 
-    @Query("SELECT * FROM country WHERE isFavorite = 1")
-    fun getFavorite(): Single<List<Country>>
-
-    @Query("SELECT * FROM country WHERE name like :name")
-    fun getCountries(name: String): Single<List<Country>>
+    @Query("SELECT * FROM country WHERE name like :name order by name")
+    fun getCountriesByName(name: String): Flowable<List<Country>>
 
     @Transaction
     fun updateIsFavorite(countryName: String, isFavorite: Boolean) {

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.LiveDataReactiveStreams
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountrySearchInteractor
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
+import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListViewState
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
@@ -13,6 +14,7 @@ class CountrySearchViewModel(countrySearchInteractor: CountrySearchInteractor) :
 
     override val reducer = BiFunction { previousState: CountrySearchViewState, result: CountrySearchResult ->
         when (result) {
+
             is CountrySearchResult.LoadCountriesByNameResult.NotStarted -> {
                 previousState.copy(
                         isLoading = false,
@@ -31,6 +33,20 @@ class CountrySearchViewModel(countrySearchInteractor: CountrySearchInteractor) :
             }
             is CountrySearchResult.LoadCountriesByNameResult.Failure -> previousState.copy(isLoading = false, searchNotStartedYet = false, error = result.error)
             is CountrySearchResult.LoadCountriesByNameResult.InProgress -> previousState.copy(isLoading = true, searchNotStartedYet = false, searchQuery = result.searchQuery, error = null)
+            is CountrySearchResult.AddToFavoriteResult -> when (result) {
+                is CountrySearchResult.AddToFavoriteResult.Success -> previousState.copy(
+                        isLoading = false, error = null, message = CountryListViewState.MessageType.AddToFavorite)
+                is CountrySearchResult.AddToFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                is CountrySearchResult.AddToFavoriteResult.InProgress -> previousState.copy(isLoading = true)
+                is CountrySearchResult.AddToFavoriteResult.Reset -> previousState.copy(message = null)
+            }
+            is CountrySearchResult.RemoveFromFavoriteResult -> when (result) {
+                is CountrySearchResult.RemoveFromFavoriteResult.Success -> previousState.copy(
+                        isLoading = false, error = null, message = CountryListViewState.MessageType.RemoveFromFavorite)
+                is CountrySearchResult.RemoveFromFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                is CountrySearchResult.RemoveFromFavoriteResult.InProgress -> previousState.copy(isLoading = true)
+                is CountrySearchResult.RemoveFromFavoriteResult.Reset -> previousState.copy(message = null)
+            }
         }
     }
 
@@ -60,6 +76,8 @@ class CountrySearchViewModel(countrySearchInteractor: CountrySearchInteractor) :
     override fun actionFromIntent(intent: CountrySearchIntent): CountrySearchAction {
         return when (intent) {
             is CountrySearchIntent.SearchIntent -> CountrySearchAction.LoadCountriesByNameAction(intent.searchQuery)
+            is CountrySearchIntent.AddToFavoriteIntent -> CountrySearchAction.AddToFavoriteAction(intent.countryName)
+            is CountrySearchIntent.RemoveFromFavoriteIntent -> CountrySearchAction.RemoveFromFavoriteAction(intent.countryName)
         }
     }
 }

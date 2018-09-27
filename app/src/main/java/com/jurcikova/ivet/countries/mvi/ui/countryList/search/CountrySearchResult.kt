@@ -10,4 +10,16 @@ sealed class CountrySearchResult : MviResult {
         data class Failure(val error: Throwable) : LoadCountriesByNameResult()
         data class InProgress(val searchQuery: String) : LoadCountriesByNameResult()
     }
+    sealed class AddToFavoriteResult: CountrySearchResult() {
+       object Success : AddToFavoriteResult()
+        data class Failure(val error: Throwable) : AddToFavoriteResult()
+        object InProgress : AddToFavoriteResult()
+        object Reset: AddToFavoriteResult()
+    }
+    sealed class RemoveFromFavoriteResult: CountrySearchResult() {
+        object Success : RemoveFromFavoriteResult()
+        data class Failure(val error: Throwable) : RemoveFromFavoriteResult()
+        object InProgress : RemoveFromFavoriteResult()
+        object Reset: RemoveFromFavoriteResult()
+    }
 }

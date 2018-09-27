@@ -8,6 +8,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
@@ -25,10 +26,9 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         Observable.just(CountryListIntent.InitialIntent)
     }
 
-    private val refreshIntentPublisher = PublishSubject.create<CountryListIntent.RefreshIntent>()
     private val changeFilterPublisher = PublishSubject.create<CountryListIntent.ChangeFilterIntent>()
-    private val addToFavoriteIntentPublisher = PublishSubject.create<CountryListIntent.AddToFavoriteIntent>()
-    private val removeFromFavoriteIntentPublisher = PublishSubject.create<CountryListIntent.RemoveFromFavoriteIntent>()
+    private val addToFavoritePublisher = PublishSubject.create<CountryListIntent.AddToFavoriteIntent>()
+    private val removeFromFavoritePublisher = PublishSubject.create<CountryListIntent.RemoveFromFavoriteIntent>()
 
     private val adapter by inject<CountryAdapter>()
 
@@ -60,23 +60,15 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         })
     }
 
-    override fun onResume() {
-        super.onResume()
-        // conflicting with the initial intent but needed when coming back from the
-        // CountryDetail fragment to refresh the list.
-        refreshIntentPublisher.onNext(CountryListIntent.RefreshIntent)
-    }
-
     override fun initViews() {
         setupListView()
     }
 
     override fun intents() = Observable.merge(
             initialIntent,
-            refreshIntent(),
-        //    changeFilterIntent(),
-            addToFavoriteIntentPublisher,
-            removeFromFavoriteIntentPublisher
+            changeFilterIntent(),
+            addToFavoriteIntent(),
+            removeFromFavoriteIntent()
     )
 
     override fun render(state: CountryListViewState) {
@@ -98,13 +90,14 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
 
     private fun setupListView() {
         binding.rvCountries.layoutManager = LinearLayoutManager(activity)
+        (binding.rvCountries.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         binding.rvCountries.adapter = adapter
 
         adapter.favoriteButtonClickObservable.observe(this, Observer {
             if (it.isFavorite) {
-                removeFromFavoriteIntentPublisher.onNext(CountryListIntent.RemoveFromFavoriteIntent(it.name))
+                removeFromFavoritePublisher.onNext(CountryListIntent.RemoveFromFavoriteIntent(it.name))
             } else {
-                addToFavoriteIntentPublisher.onNext(CountryListIntent.AddToFavoriteIntent(it.name))
+                addToFavoritePublisher.onNext(CountryListIntent.AddToFavoriteIntent(it.name))
             }
         })
 
@@ -117,8 +110,11 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
     private fun changeFilterIntent(): Observable<CountryListIntent.ChangeFilterIntent> =
             changeFilterPublisher
 
-    private fun refreshIntent(): Observable<CountryListIntent.RefreshIntent> =
-            refreshIntentPublisher
+    private fun addToFavoriteIntent(): Observable<CountryListIntent.AddToFavoriteIntent> =
+            addToFavoritePublisher
+
+    private fun removeFromFavoriteIntent(): Observable<CountryListIntent.RemoveFromFavoriteIntent> =
+            removeFromFavoritePublisher
 
     private fun showFilteringPopUpMenu(): Boolean =
             PopupMenu(activity, activity?.findViewById(R.id.menu_filter)).let { menu ->
