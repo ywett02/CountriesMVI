@@ -80,8 +80,12 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     }
 
     private fun showMessage(messageType: MessageType) {
-        showMessage("Country was " +
-                "${if (messageType is MessageType.AddToFavorite) "marked" else "unmarked"} as favorite")
+        showMessage(getString(R.string.toast_favorite_message,
+                if (messageType is MessageType.AddToFavorite) {
+                    getString(R.string.toast_favorite_message_marked)
+                } else {
+                    getString(R.string.toast_favorite_message_unmarked)
+                }))
     }
 
     private fun showErrorMessage(exception: Throwable) {

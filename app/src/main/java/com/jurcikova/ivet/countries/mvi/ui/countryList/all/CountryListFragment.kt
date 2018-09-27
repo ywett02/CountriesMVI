@@ -110,7 +110,7 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         })
 
         adapter.countryClickObservable.observe(this, Observer { country ->
-           navigate(CountryListFragmentDirections.actionCountryListFragmentToCountryDetailFragment(country!!.name))
+            navigate(CountryListFragmentDirections.actionCountryListFragmentToCountryDetailFragment(country!!.name))
         })
     }
 
@@ -139,8 +139,12 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
             }
 
     private fun showMessage(messageType: MessageType) {
-        showMessage("Country was " +
-                "${if (messageType is MessageType.AddToFavorite) "marked" else "unmarked"} as favorite")
+        showMessage(getString(R.string.toast_favorite_message,
+                if (messageType is MessageType.AddToFavorite) {
+                    getString(R.string.toast_favorite_message_marked)
+                } else {
+                    getString(R.string.toast_favorite_message_unmarked)
+                }))
     }
 
     private fun showErrorMessage(exception: Throwable) {

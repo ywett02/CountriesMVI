@@ -11,4 +11,7 @@
 	<string name="action_filter">filter</string>
     <string name="action_show_all">All</string>
     <string name="action_show_favorite">Favorite</string>
+    <string name="toast_favorite_message">Country was %1$s as favorite"</string>
+    <string name="toast_favorite_message_marked">marked"</string>
+    <string name="toast_favorite_message_unmarked">unmarked"</string>
 </resources>
