@@ -4,7 +4,9 @@ import com.jurcikova.ivet.countries.mvi.business.api.CountryApi
 import com.jurcikova.ivet.countries.mvi.business.db.dao.CountryDao
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
 import com.strv.ktools.logD
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
+import io.reactivex.Observable
 
 interface CountryRepository {
 
@@ -29,23 +31,27 @@ class CountryRepositoryImpl(private val countryService: CountryApi, private val 
         countryDao.updateIsFavorite(countryName, false)
     }
 
-    override fun getCountry(countryName: String): Flowable<Country> {
-        getCountryFromApi(countryName)
-        return getCountryFromDb(countryName)
-    }
+    override fun getCountry(countryName: String): Flowable<Country> =
+            Observable.concatArrayEager(
+                    getCountryFromDb(countryName),
+                    getCountryFromApi(countryName))
+                    .toFlowable(BackpressureStrategy.BUFFER)
 
-    override fun getCountriesByName(searchQuery: String): Flowable<List<Country>> {
-        getCountriesFromApi(searchQuery)
-        return getCountriesByNameFromDb(searchQuery)
-    }
+    override fun getCountriesByName(searchQuery: String): Flowable<List<Country>> =
+            Observable.concatArrayEager(
+                    getCountriesFromApi(searchQuery),
+                    getCountriesByNameFromDb(searchQuery))
+                    .toFlowable(BackpressureStrategy.BUFFER)
 
-    override fun getAllCountries(): Flowable<List<Country>> {
-        getCountriesFromApi()
-        return getCountriesFromDb()
-    }
+    override fun getAllCountries(): Flowable<List<Country>> =
+            Observable.concatArrayEager(
+                    getCountriesFromDb(),
+                    getCountriesFromApi())
+                    .toFlowable(BackpressureStrategy.BUFFER)
 
     private fun getCountryFromDb(name: String) =
             countryDao.getCountry(name)
+                    .toObservable()
                     .doOnNext { logD("Dispatching ${it.name} from DB...") }
 
     private fun getCountryFromApi(name: String) =
@@ -61,6 +67,7 @@ class CountryRepositoryImpl(private val countryService: CountryApi, private val 
 
     private fun getCountriesFromDb() =
             countryDao.getAll()
+                    .toObservable()
                     .doOnNext { logD("Dispatching ${it.size} from DB...") }
 
     private fun getCountriesFromApi() =
@@ -73,6 +80,7 @@ class CountryRepositoryImpl(private val countryService: CountryApi, private val 
 
     private fun getCountriesByNameFromDb(name: String) =
             countryDao.getCountriesByName("%$name%")
+                    .toObservable()
                     .doOnNext { logD("Dispatching ${it.size} from DB...") }
 
     private fun getCountriesFromApi(name: String) =
