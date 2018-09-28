@@ -32,68 +32,47 @@ class CountryRepositoryImpl(private val countryService: CountryApi, private val 
     }
 
     override fun getCountry(countryName: String): Flowable<Country> =
-            Observable.concatArrayEager(
-                    getCountryFromDb(countryName),
-                    getCountryFromApi(countryName))
-                    .toFlowable(BackpressureStrategy.BUFFER)
+            getCountryFromDb(countryName)
 
     override fun getCountriesByName(searchQuery: String): Flowable<List<Country>> =
-            Observable.concatArrayEager(
-                    getCountriesFromApi(searchQuery),
-                    getCountriesByNameFromDb(searchQuery))
-                    .toFlowable(BackpressureStrategy.BUFFER)
+            getCountriesByNameFromDb(searchQuery)
 
-    override fun getAllCountries(): Flowable<List<Country>> =
-            Observable.concatArrayEager(
-                    getCountriesFromDb(),
-                    getCountriesFromApi())
-                    .toFlowable(BackpressureStrategy.BUFFER)
-
-    private fun getCountryFromDb(name: String) =
-            countryDao.getCountry(name)
-                    .toObservable()
-                    .doOnNext { logD("Dispatching ${it.name} from DB...") }
-
-    private fun getCountryFromApi(name: String) =
-            countryService.getCountriesByName(name)
-                    .map {
-                        it.first()
-                    }
-                    .toObservable()
-                    .doOnNext {
-                        logD("Dispatching ${it.name} country from API...")
-                        storeCountryInDb(it)
-                    }
+    override fun getAllCountries(): Flowable<List<Country>>  {
+        return Observable.concatArrayEager(
+                getCountriesFromDb(),
+                getCountriesFromApi())
+                .toFlowable(BackpressureStrategy.BUFFER)
+    }
 
     private fun getCountriesFromDb() =
             countryDao.getAll()
                     .toObservable()
                     .doOnNext { logD("Dispatching ${it.size} from DB...") }
 
-    private fun getCountriesFromApi() =
-            countryService.getAllCountries()
-                    .toObservable()
-                    .doOnNext {
-                        logD("Dispatching ${it.size} countries from API...")
-                        storeCountriesInDb(it)
-                    }
+    private fun getCountryFromDb(name: String) =
+            countryDao.getCountry(name)
+                    .doOnNext { logD("Dispatching ${it.name} from DB...") }
 
     private fun getCountriesByNameFromDb(name: String) =
             countryDao.getCountriesByName("%$name%")
-                    .toObservable()
                     .doOnNext { logD("Dispatching ${it.size} from DB...") }
 
-    private fun getCountriesFromApi(name: String) =
-            countryService.getCountriesByName(name)
+    private fun getCountriesFromApi() =
+            countryService.getAllCountries()
                     .toObservable()
-                    .doOnNext {
-                        logD("Dispatching ${it.size} countries from API...")
-                        storeCountriesInDb(it)
-                    }
+                    .doOnNext { countries ->
+                        logD("Dispatching ${countries.size} countries from API...")
+                        val updatedItems = (countryDao.getAllSync() + countries).groupBy {
+                            it
+                        }.filter {
+                            it.value.size == 1
+                        }.keys.toList()
 
-    private fun storeCountryInDb(country: Country) {
-        storeCountriesInDb(listOf(country))
-    }
+                        if (updatedItems.isNotEmpty()) {
+                            logD("Saving ${updatedItems.size} countries from API to DB...")
+                            storeCountriesInDb(updatedItems)
+                        }
+                    }
 
     private fun storeCountriesInDb(countries: List<Country>) {
         countryDao.insertFetchedCountries(countries = countries)

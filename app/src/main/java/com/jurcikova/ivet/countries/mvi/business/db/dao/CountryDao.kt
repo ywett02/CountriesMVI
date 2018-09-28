@@ -25,6 +25,9 @@ interface CountryDao {
     @Query("SELECT * FROM country order by name")
     fun getAll(): Flowable<List<Country>>
 
+    @Query("SELECT * FROM country order by name")
+    fun getAllSync(): List<Country>
+
     @Query("SELECT * FROM country WHERE name like :name order by name")
     fun getCountriesByName(name: String): Flowable<List<Country>>
 
