@@ -15,7 +15,9 @@
             app:destination="@id/countrySearchFragment" />
         <action
             android:id="@+id/action_countryListFragment_to_countryDetailFragment"
-            app:destination="@id/countryDetailFragment" />
+            app:destination="@id/countryDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/countrySearchFragment"
