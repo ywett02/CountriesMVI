@@ -9,7 +9,7 @@
     </style>
 
     <style name="TextAppearance.AppTheme.ScreenTitle" parent="TextAppearance.AppCompat.Display1">
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">32sp</item>
         <item name="android:textColor">@color/toolbar_text_color</item>
         <item name="android:shadowDy">0</item>
         <item name="android:shadowDx">0</item>
