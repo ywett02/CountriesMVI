@@ -29,7 +29,6 @@ fun View.setInvisible(invisible: Boolean) {
 @Suppress("UNCHECKED_CAST")
 @BindingAdapter("list")
 fun <E> RecyclerView.setList(list: List<E>?) {
-    list.logMe()
     list?.let {
         (adapter as ListAdapter<E, *>?)?.submitList(it)
     }
