@@ -17,7 +17,8 @@
             android:id="@+id/action_countryListFragment_to_countryDetailFragment"
             app:destination="@id/countryDetailFragment"
             app:enterAnim="@anim/fade_in"
-            app:exitAnim="@anim/fade_out" />
+            app:exitAnim="@anim/fade_out"
+            app:popUpTo="@+id/countryListFragment" />
     </fragment>
     <fragment
         android:id="@+id/countrySearchFragment"
@@ -26,7 +27,10 @@
         tools:layout="@layout/fragment_country_search">
         <action
             android:id="@+id/action_countrySearchFragment_to_countryDetailFragment"
-            app:destination="@id/countryDetailFragment" />
+            app:destination="@id/countryDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popUpTo="@+id/countryListFragment" />
     </fragment>
     <fragment
         android:id="@+id/countryDetailFragment"
@@ -35,5 +39,6 @@
         tools:layout="@layout/fragment_country_detail">
         <argument
             android:name="argCountryName"
-            app:argType="string" /></fragment>
+            app:argType="string" />
+    </fragment>
 </navigation>

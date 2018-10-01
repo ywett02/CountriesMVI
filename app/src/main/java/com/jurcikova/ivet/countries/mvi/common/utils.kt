@@ -1,6 +1,8 @@
 package com.jurcikova.ivet.countries.mvi.common
 
 import android.app.Activity
+import android.content.Context
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
@@ -37,4 +39,14 @@ fun Fragment.navigate(directions: NavDirections) {
 }
 
 fun Activity.findNavController(viewId: Int) =
-    Navigation.findNavController(this, R.id.my_nav_host_fragment)
+        Navigation.findNavController(this, R.id.my_nav_host_fragment)
+
+fun Fragment.hideKeyboard() {
+    this.activity?.let { activity ->
+        activity.currentFocus?.let { view ->
+            (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).also {
+                it.hideSoftInputFromWindow(view.windowToken, 0)
+            }
+        }
+    }
+}

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.jakewharton.rxbinding2.widget.RxSearchView
 import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
+import com.jurcikova.ivet.countries.mvi.common.hideKeyboard
 import com.jurcikova.ivet.countries.mvi.common.navigate
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
@@ -85,6 +86,7 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
         binding.rvCountries.adapter = adapter
 
         adapter.countryClickObservable.observe(this, Observer { country ->
+            hideKeyboard()
             navigate(CountrySearchFragmentDirections.actionCountrySearchFragmentToCountryDetailFragment(country!!.name))
         })
 
