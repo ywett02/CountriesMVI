@@ -33,15 +33,6 @@ class CountryListInteractor(val countryRepository: CountryRepository) : MviInter
                                         logD("result: $result")
                                     }
                     )
-                            .mergeWith(
-                                    // Error for not implemented actions
-                                    selector.filter { v ->
-                                        v !is LoadCountriesAction && v !is AddToFavoriteAction && v !is RemoveFromFavoriteAction
-                                    }.flatMap { w ->
-                                        Observable.error<CountryListResult>(
-                                                IllegalArgumentException("Unknown Action type: $w"))
-                                    }
-                            )
                 }
             }
 

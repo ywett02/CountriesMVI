@@ -33,16 +33,6 @@ class CountrySearchInteractor(val countryRepository: CountryRepository) : MviInt
                                         logD("result: $result")
                                     }
                     )
-
-                            .mergeWith(
-                                    // Error for not implemented actions
-                                    selector.filter { v ->
-                                        v !is CountrySearchAction.LoadCountriesByNameAction && v !is CountrySearchAction.AddToFavoriteAction && v !is CountrySearchAction.RemoveFromFavoriteAction
-                                    }.flatMap { w ->
-                                        Observable.error<CountrySearchResult>(
-                                                IllegalArgumentException("Unknown Action type: $w"))
-                                    }
-                            )
                 }
             }
 
