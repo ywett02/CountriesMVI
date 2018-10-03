@@ -7,7 +7,6 @@ import com.jakewharton.rxbinding2.view.RxView
 import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
-import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
 import io.reactivex.Observable
@@ -16,12 +15,16 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>() {
 
+    companion object {
+        val countryName = "countryName"
+    }
+
     private val countryDetailViewModel: CountryDetailViewModel by viewModel()
 
     private val adapter by inject<CountryPropertyAdapter>()
 
     private val initialIntent by lazy {
-        Observable.just(CountryDetailIntent.InitialIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName) as CountryDetailIntent)
+        Observable.just(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)) as CountryDetailIntent)
     }
 
     private val favoriteButtonClickedIntent by lazy {

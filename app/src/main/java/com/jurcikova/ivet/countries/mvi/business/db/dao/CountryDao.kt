@@ -17,7 +17,7 @@ interface CountryDao {
     fun updateCountry(country: Country)
 
     @Query("SELECT * FROM country WHERE name = :name")
-    fun getCountry(name: String): Flowable<Country>
+    fun getCountry(name: String?): Flowable<Country>
 
     @Query("SELECT * FROM country WHERE name = :name")
     fun getCountrySync(name: String): Country?

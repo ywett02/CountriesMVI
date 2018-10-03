@@ -2,12 +2,11 @@ package com.jurcikova.ivet.countries.mvi.common
 
 import android.app.Activity
 import android.content.Context
+import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
-import com.jurcikova.ivet.mvi.R
 import io.reactivex.Observable
 import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
@@ -34,11 +33,11 @@ fun <T> pairWithDelay(immediate: T, delayed: T): Observable<T> {
             .startWith(immediate)
 }
 
-fun Fragment.navigate(directions: NavDirections) {
-    findNavController().navigate(directions)
+fun Fragment.navigate(actionId: Int, bundle: Bundle) {
+    findNavController().navigate(actionId, bundle)
 }
 
-fun Activity.findNavController(viewId: Int) =
+fun Activity.findNavController() =
         Navigation.findNavController(this, R.id.my_nav_host_fragment)
 
 fun Fragment.hideKeyboard() {
@@ -50,3 +49,10 @@ fun Fragment.hideKeyboard() {
         }
     }
 }
+
+fun bundleOf(bundle: Pair<String, String>) =
+        Bundle().apply {
+            putString(bundle.first, bundle.second)
+        }
+
+

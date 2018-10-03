@@ -10,10 +10,11 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.jakewharton.rxbinding2.support.v4.widget.refreshes
 import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
+import com.jurcikova.ivet.countries.mvi.common.bundleOf
 import com.jurcikova.ivet.countries.mvi.common.navigate
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailFragment.Companion.countryName
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
-import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryListBinding
 import com.strv.ktools.logD
 import io.reactivex.Observable
@@ -110,7 +111,7 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         })
 
         adapter.countryClickObservable.observe(this, Observer { country ->
-            navigate(CountryListFragmentDirections.actionCountryListFragmentToCountryDetailFragment(country!!.name))
+            navigate(R.id.action_countryListFragment_to_countryDetailFragment, bundleOf(countryName to country!!.name))
         })
     }
 

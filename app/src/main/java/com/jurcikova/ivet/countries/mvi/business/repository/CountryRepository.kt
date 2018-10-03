@@ -10,7 +10,7 @@ import io.reactivex.Observable
 
 interface CountryRepository {
 
-    fun getCountry(countryName: String): Flowable<Country>
+    fun getCountry(countryName: String?): Flowable<Country>
 
     fun getAllCountries(): Flowable<List<Country>>
 
@@ -31,7 +31,7 @@ class CountryRepositoryImpl(private val countryService: CountryApi, private val 
         countryDao.updateIsFavorite(countryName, false)
     }
 
-    override fun getCountry(countryName: String): Flowable<Country> =
+    override fun getCountry(countryName: String?): Flowable<Country> =
             getCountryFromDb(countryName)
 
     override fun getCountriesByName(searchQuery: String): Flowable<List<Country>> =
@@ -49,7 +49,7 @@ class CountryRepositoryImpl(private val countryService: CountryApi, private val 
                     .toObservable()
                     .doOnNext { logD("Dispatching ${it.size} from DB...") }
 
-    private fun getCountryFromDb(name: String) =
+    private fun getCountryFromDb(name: String?) =
             countryDao.getCountry(name)
                     .doOnNext { logD("Dispatching ${it.name} from DB...") }
 
