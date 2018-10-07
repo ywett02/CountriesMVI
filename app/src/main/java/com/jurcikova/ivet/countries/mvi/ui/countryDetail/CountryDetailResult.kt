@@ -10,7 +10,7 @@ sealed class CountryDetailResult : MviResult {
         object InProgress : LoadCountryDetailResult()
     }
     sealed class AddToFavoriteResult: CountryDetailResult() {
-        object Success : AddToFavoriteResult()
+       object Success : AddToFavoriteResult()
         data class Failure(val error: Throwable) : AddToFavoriteResult()
         object InProgress : AddToFavoriteResult()
         object Reset: AddToFavoriteResult()

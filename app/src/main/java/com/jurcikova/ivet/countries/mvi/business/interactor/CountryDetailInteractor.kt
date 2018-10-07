@@ -5,16 +5,14 @@ import com.jurcikova.ivet.countries.mvi.common.pairWithDelay
 import com.jurcikova.ivet.countries.mvi.mvibase.MviInteractor
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailAction
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailResult
-import com.strv.ktools.inject
 import com.strv.ktools.logD
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-class CountryDetailInteractor : MviInteractor<CountryDetailAction, CountryDetailResult> {
-
-    private val countryRepository by inject<CountryRepository>()
+class CountryDetailInteractor(val countryRepository: CountryRepository) : MviInteractor<CountryDetailAction, CountryDetailResult> {
 
     override val actionProcessor =
             ObservableTransformer<CountryDetailAction, CountryDetailResult> { actions ->
@@ -33,17 +31,6 @@ class CountryDetailInteractor : MviInteractor<CountryDetailAction, CountryDetail
                                         logD("result: $result")
                                     }
                     )
-                            .mergeWith(
-                                    // Error for not implemented actions
-                                    selector.filter { v ->
-                                        v !is CountryDetailAction.LoadCountryDetailAction &&
-                                                v !is CountryDetailAction.AddToFavoriteAction &&
-                                                v !is CountryDetailAction.RemoveFromFavoriteAction
-                                    }.flatMap { w ->
-                                        Observable.error<CountryDetailResult>(
-                                                IllegalArgumentException("Unknown Action type: $w"))
-                                    }
-                            )
                 }
             }
 
@@ -51,8 +38,6 @@ class CountryDetailInteractor : MviInteractor<CountryDetailAction, CountryDetail
             ObservableTransformer<CountryDetailAction.LoadCountryDetailAction, CountryDetailResult> { actions ->
                 actions.flatMap { action ->
                     countryRepository.getCountry(action.countryName)
-                            // Transform the Single to an Observable to allow emission of multiple
-                            // events down the stream (e.g. the InFlight event)
                             .toObservable()
                             // Wrap returned data into an immutable object
                             .map { country -> CountryDetailResult.LoadCountryDetailResult.Success(country) }
@@ -73,29 +58,43 @@ class CountryDetailInteractor : MviInteractor<CountryDetailAction, CountryDetail
 
     private val addToFavorite =
             ObservableTransformer<CountryDetailAction.AddToFavoriteAction, CountryDetailResult> { actions ->
-                actions.flatMap { _ ->
-                    // Emit two events to allow the UI notification to be hidden after
-                    // some delay
-                    pairWithDelay(
-                            CountryDetailResult.AddToFavoriteResult.Success,
-                            CountryDetailResult.AddToFavoriteResult.Reset)
+                actions.flatMap { action ->
+                    Completable.fromAction {
+                        countryRepository.addToFavorite(action.countryName)
+                    }
+                            .andThen(
+                                    // Emit two events to allow the UI notification to be hidden after
+                                    // some delay
+                                    pairWithDelay(
+                                            CountryDetailResult.AddToFavoriteResult.Success,
+                                            CountryDetailResult.AddToFavoriteResult.Reset)
+                            )
+                            .cast(CountryDetailResult::class.java)
+                            .onErrorReturn { CountryDetailResult.AddToFavoriteResult.Failure(it) }
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .startWith(CountryDetailResult.AddToFavoriteResult.InProgress)
                 }
-                        .cast(CountryDetailResult::class.java)
-                        .onErrorReturn { CountryDetailResult.AddToFavoriteResult.Failure(it) }
-                        .startWith(CountryDetailResult.AddToFavoriteResult.InProgress)
             }
 
     private val removeFromFavorite =
             ObservableTransformer<CountryDetailAction.RemoveFromFavoriteAction, CountryDetailResult> { actions ->
-                actions.flatMap { _ ->
-                    // Emit two events to allow the UI notification to be hidden after
-                    // some delay
-                    pairWithDelay(
-                            CountryDetailResult.RemoveFromFavoriteResult.Success,
-                            CountryDetailResult.RemoveFromFavoriteResult.Reset)
+                actions.flatMap { action ->
+                    Completable.fromAction {
+                        countryRepository.removeFromFavorite(action.countryName)
+                    }
+                            .andThen(
+                                    // Emit two events to allow the UI notification to be hidden after
+                                    // some delay
+                                    pairWithDelay(
+                                            CountryDetailResult.RemoveFromFavoriteResult.Success,
+                                            CountryDetailResult.RemoveFromFavoriteResult.Reset)
+                            )
+                            .cast(CountryDetailResult::class.java)
+                            .onErrorReturn { CountryDetailResult.RemoveFromFavoriteResult.Failure(it) }
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .startWith(CountryDetailResult.RemoveFromFavoriteResult.InProgress)
                 }
-                        .cast(CountryDetailResult::class.java)
-                        .onErrorReturn { CountryDetailResult.RemoveFromFavoriteResult.Failure(it) }
-                        .startWith(CountryDetailResult.RemoveFromFavoriteResult.InProgress)
             }
 }

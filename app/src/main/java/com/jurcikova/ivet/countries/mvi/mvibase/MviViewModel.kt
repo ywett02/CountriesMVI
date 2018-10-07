@@ -1,7 +1,6 @@
 package com.jurcikova.ivet.countries.mvi.mvibase
 
-import android.arch.lifecycle.LiveData
-import com.jurcikova.ivet.countriesMVI.mvibase.MviIntent
+import androidx.lifecycle.LiveData
 import io.reactivex.Observable
 
 /**

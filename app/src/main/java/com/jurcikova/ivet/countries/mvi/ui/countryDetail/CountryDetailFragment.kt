@@ -1,33 +1,39 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.view.RxView
+import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
-import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
-import com.jurcikova.ivet.mvi.R
+import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
-import com.strv.ktools.logMe
 import io.reactivex.Observable
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>() {
 
-    private val viewModel: CountryDetailViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProviders.of(this).get(CountryDetailViewModel::class.java)
+    companion object {
+        val countryName = "countryName"
     }
 
+    private val countryDetailViewModel: CountryDetailViewModel by viewModel()
+
+    private val adapter by inject<CountryPropertyAdapter>()
+
     private val initialIntent by lazy {
-        Observable.just(CountryDetailIntent.InitialIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName) as CountryDetailIntent)
+        Observable.just(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)) as CountryDetailIntent)
     }
 
     private val favoriteButtonClickedIntent by lazy {
         RxView.clicks(binding.fabAdd).flatMap {
-            viewModel.statesStream().map {
-                if (!it.isFavorite) CountryDetailIntent.AddToFavoriteIntent(it.country!!.name) else {
-                    CountryDetailIntent.RemoveFavoriteIntent(it.country!!.name)
+            countryDetailViewModel.statesStream().map { state ->
+                if (state.country?.isFavorite != true) {
+                    CountryDetailIntent.AddToFavoriteIntent(state.country!!.name)
+                } else {
+                    CountryDetailIntent.RemoveFavoriteIntent(state.country.name)
                 }
             }.take(1)
         }
@@ -38,7 +44,8 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.states().observe(this, Observer { state ->
+
+        countryDetailViewModel.states().observe(this, Observer { state ->
             logD("state: $state")
 
             render(state!!)
@@ -46,10 +53,11 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     }
 
     override fun initViews() {
+        setupListView()
     }
 
     override fun startStream() {
-        viewModel.processIntents(intents())
+        countryDetailViewModel.processIntents(intents())
     }
 
     override fun intents(): Observable<CountryDetailIntent> = Observable.merge(
@@ -60,8 +68,8 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     override fun render(state: CountryDetailViewState) {
         binding.countryDetailViewState = state
 
-        if (state.showMessage) {
-            showMessage(state.isFavorite)
+        if (state.message != null) {
+            showMessage(state.message)
         }
 
         state.error?.let {
@@ -69,15 +77,21 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
         }
     }
 
-    private fun showMessage(isFavorite: Boolean) {
-        activity?.let {
-            Toast.makeText(it, "Country was marked as ${if (isFavorite) "favorite" else "not favorite"}", Toast.LENGTH_SHORT).show()
-        }
+    private fun setupListView() {
+        binding.rvProperties.layoutManager = LinearLayoutManager(activity)
+        binding.rvProperties.adapter = adapter
+    }
+
+    private fun showMessage(messageType: MessageType) {
+        showMessage(getString(R.string.toast_favorite_message,
+                if (messageType is MessageType.AddToFavorite) {
+                    getString(R.string.toast_favorite_message_marked)
+                } else {
+                    getString(R.string.toast_favorite_message_unmarked)
+                }))
     }
 
     private fun showErrorMessage(exception: Throwable) {
-        activity?.let {
-            Toast.makeText(it, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
-        }
+        showMessage(exception.localizedMessage)
     }
 }

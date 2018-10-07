@@ -8,32 +8,37 @@
     <fragment
         android:id="@+id/countryListFragment"
         android:name="com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListFragment"
-        android:label="CountryListFragment" >
+        android:label="CountryListFragment"
+        tools:layout="@layout/fragment_country_list">
         <action
             android:id="@+id/action_countryListFragment_to_countrySearchFragment"
-            app:destination="@id/countrySearchFragment"
-            app:enterAnim="@anim/fade_in"
-            app:exitAnim="@anim/fade_out"
-            app:launchSingleTop="false"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out" />
+            app:destination="@id/countrySearchFragment" />
         <action
             android:id="@+id/action_countryListFragment_to_countryDetailFragment"
-            app:destination="@id/countryDetailFragment" />
+            app:destination="@id/countryDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popUpTo="@+id/countryListFragment" />
     </fragment>
     <fragment
         android:id="@+id/countrySearchFragment"
         android:name="com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchFragment"
-        android:label="CountrySearchFragment" >
+        android:label="CountrySearchFragment"
+        tools:layout="@layout/fragment_country_search">
         <action
             android:id="@+id/action_countrySearchFragment_to_countryDetailFragment"
-            app:destination="@id/countryDetailFragment" />
+            app:destination="@id/countryDetailFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popUpTo="@+id/countryListFragment" />
     </fragment>
     <fragment
         android:id="@+id/countryDetailFragment"
         android:name="com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailFragment"
-        android:label="CountryDetailFragment" >
+        android:label="CountryDetailFragment"
+        tools:layout="@layout/fragment_country_detail">
         <argument
             android:name="argCountryName"
-            app:argType="string" /></fragment>
+            app:argType="string" />
+    </fragment>
 </navigation>

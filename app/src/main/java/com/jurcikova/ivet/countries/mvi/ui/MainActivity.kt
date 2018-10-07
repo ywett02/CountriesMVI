@@ -1,10 +1,9 @@
 package com.jurcikova.ivet.countries.mvi.ui
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import androidx.navigation.Navigation
-import androidx.navigation.ui.NavigationUI
+import androidx.appcompat.app.AppCompatActivity
 import com.jurcikova.ivet.countries.mvi.common.BindActivity
+import com.jurcikova.ivet.countries.mvi.common.findNavController
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.ActivityMainBinding
 
@@ -15,12 +14,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding.toolbar.let {
-            it.title = title
-            it.inflateMenu(R.menu.menu_search)
-            it.setOnMenuItemClickListener {item ->
-                NavigationUI.onNavDestinationSelected(item, Navigation.findNavController(this, R.id.my_nav_host_fragment))
-            }
-        }
+        binding.toolbar.title = title
     }
+
+    override fun onSupportNavigateUp()
+            = findNavController(R.id.my_nav_host_fragment).navigateUp()
 }

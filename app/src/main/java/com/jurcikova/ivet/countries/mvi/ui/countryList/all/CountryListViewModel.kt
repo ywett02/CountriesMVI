@@ -1,33 +1,28 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.all
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.LiveDataReactiveStreams
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataReactiveStreams
+import com.jurcikova.ivet.countries.mvi.business.entity.Country
+import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor
 import com.jurcikova.ivet.countries.mvi.common.notOfType
-import com.jurcikova.ivet.countries.mvi.mvibase.MviViewModel
-import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
+import com.jurcikova.ivet.countries.mvi.ui.base.BaseViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
-import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.SwipeToRefresh
-import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.LoadCountriesResult
-import com.strv.ktools.inject
+import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.*
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
-import io.reactivex.subjects.PublishSubject
 
-class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
-
-    private val countryListInteractor by inject<CountryListInteractor>()
+class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
 
     /**
      * take only the first ever InitialIntent and all intents of other types
      * to avoid reloading data on config changes
      */
-    private val intentFilter: ObservableTransformer<CountryListIntent, CountryListIntent>
+    private val initialIntentFilter: ObservableTransformer<CountryListIntent, CountryListIntent>
         get() = ObservableTransformer { intents ->
             intents.publish { selected ->
                 Observable.merge(
@@ -41,25 +36,40 @@ class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction,
         when (result) {
             is LoadCountriesResult -> when (result) {
                 is LoadCountriesResult.Success -> {
+                    val filterType = result.filterType ?: previousState.filterType
                     previousState.copy(
                             isLoading = false,
                             isRefreshing = false,
-                            countries = result.countries
-
+                            filterType = filterType,
+                            countries = applyFilters(result.countries, filterType),
+                            error = null
                     )
                 }
-                is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, isRefreshing = false, error = result.error)
+                is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 is LoadCountriesResult.InProgress -> {
                     if (result.isRefreshing) {
                         previousState.copy(isLoading = false, isRefreshing = true)
                     } else previousState.copy(isLoading = true, isRefreshing = false)
                 }
             }
+            is AddToFavoriteResult -> when (result) {
+                is AddToFavoriteResult.Success -> previousState.copy(
+                        isLoading = false, error = null, message = MessageType.AddToFavorite)
+                is AddToFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                is AddToFavoriteResult.InProgress -> previousState.copy(isLoading = true)
+                is AddToFavoriteResult.Reset -> previousState.copy(message = null)
+            }
+            is RemoveFromFavoriteResult -> when (result) {
+                is RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, error = null, message = MessageType.RemoveFromFavorite)
+                is RemoveFromFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                is RemoveFromFavoriteResult.InProgress -> previousState.copy(isLoading = true)
+                is RemoveFromFavoriteResult.Reset -> previousState.copy(message = null)
+            }
         }
     }
 
     override val statesObservable: Observable<CountryListViewState> = intentsSubject
-            .compose(intentFilter)
+            .compose(initialIntentFilter)
             .map(this::actionFromIntent)
             .doOnNext { action ->
                 logD("action: $action")
@@ -90,12 +100,19 @@ class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction,
                     logD("intent: $intent")
                 }
                 .subscribe(intentsSubject)
+
     }
 
     override fun actionFromIntent(intent: CountryListIntent): CountryListAction {
         return when (intent) {
             is InitialIntent -> LoadCountriesAction(false)
-            is SwipeToRefresh -> LoadCountriesAction(true)
+            is CountryListIntent.SwipeToRefresh -> LoadCountriesAction(true)
+            is CountryListIntent.ChangeFilterIntent -> LoadCountriesAction(filterType = intent.filterType)
+            is CountryListIntent.AddToFavoriteIntent -> CountryListAction.AddToFavoriteAction(intent.countryName)
+            is CountryListIntent.RemoveFromFavoriteIntent -> CountryListAction.RemoveFromFavoriteAction(intent.countryName)
         }
     }
+
+    private fun applyFilters(countries: List<Country>, filterType: FilterType): List<Country> =
+            if (filterType == FilterType.Favorite) countries.filter { it.isFavorite } else countries
 }

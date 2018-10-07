@@ -1,14 +1,15 @@
-package com.jurcikova.ivet.countries.mvi.ui
+package com.jurcikova.ivet.countries.mvi.ui.base
 
-import android.databinding.ViewDataBinding
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.Fragment
 import com.jurcikova.ivet.countries.mvi.mvibase.MviView
 import com.jurcikova.ivet.countries.mvi.mvibase.MviViewState
-import com.jurcikova.ivet.countriesMVI.mvibase.MviIntent
+import com.jurcikova.ivet.countries.mvi.mvibase.MviIntent
 
 abstract class BaseFragment<VB: ViewDataBinding, I: MviIntent, S: MviViewState> : Fragment(), MviView<I, S> {
 
@@ -22,16 +23,22 @@ abstract class BaseFragment<VB: ViewDataBinding, I: MviIntent, S: MviViewState> 
      */
     abstract fun startStream()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? = binding.root
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         initViews()
     }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? = binding.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         startStream()
+    }
+
+    protected fun showMessage(message: String) {
+        activity?.let {
+            Toast.makeText(it, message, Toast.LENGTH_SHORT).show()
+        }
     }
 }

@@ -10,236 +10,64 @@
             type="com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailViewState" />
     </data>
 
-    <FrameLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            app:show="@{countryDetailViewState.isLoading}" />
-
-
-        <android.support.design.widget.CoordinatorLayout
+        <androidx.constraintlayout.motion.widget.MotionLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:show="@{!countryDetailViewState.isLoading &amp;&amp; countryDetailViewState.country != null}">
+            android:background="@android:color/white"
+            app:layoutDescription="@xml/collapsing_toolbar"
+            app:showPaths="true">
 
-            <android.support.design.widget.AppBarLayout
-                android:id="@+id/app_bar"
-                android:layout_width="match_parent"
-                android:layout_height="270dp"
-                android:fitsSystemWindows="true">
+            <ImageView
+                android:id="@+id/iv_flag"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                app:svg="@{countryDetailViewState.country.flag}"
+                tools:src="@drawable/world" />
 
-                <android.support.design.widget.CollapsingToolbarLayout
-                    android:id="@+id/col_toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:fitsSystemWindows="true"
-                    app:collapsedTitleTextAppearance="@style/TextAppearance.AppTheme.Title.Light"
-                    app:contentScrim="@color/colorPrimary"
-                    app:expandedTitleMargin="@dimen/space_16"
-                    app:expandedTitleTextAppearance="@style/TextAppearance.AppTheme.ScreenTitle"
-                    app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                    app:title="@{countryDetailViewState.country.name}"
-                    app:titleTextColor="@color/toolbar_text_color"
-                    app:toolbarId="@+id/toolbar">
+            <ImageView
+                android:id="@+id/iv_background"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimary"
+                android:scaleType="centerCrop" />
 
-                    <ImageView
-                        android:id="@+id/iv_flag"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:adjustViewBounds="true"
-                        android:scaleType="centerCrop"
-                        app:layout_collapseMode="parallax"
-                        app:svg="@{countryDetailViewState.country.flag}"
-                        tools:src="@drawable/world" />
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="24dp"
+                android:text="@{countryDetailViewState.country.name}"
+                android:textAppearance="@style/TextAppearance.AppTheme.ScreenTitle"
+                tools:text="Country" />
 
-                    <android.support.v7.widget.Toolbar
-                        android:id="@+id/toolbar"
-                        android:layout_width="match_parent"
-                        android:layout_height="?attr/actionBarSize"
-                        android:theme="@style/ThemeOverlay.AppTheme.ControlPrimary"
-                        app:layout_collapseMode="pin" />
-
-                </android.support.design.widget.CollapsingToolbarLayout>
-
-            </android.support.design.widget.AppBarLayout>
-
-
-            <android.support.v4.widget.NestedScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-                <android.support.constraint.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-
-                    <ImageView
-                        android:id="@+id/iv_city"
-                        android:layout_width="@dimen/icon_size"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginTop="@dimen/space_16"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_location_city" />
-
-                    <TextView
-                        android:id="@+id/tv_capital"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginEnd="@dimen/space_16"
-                        android:text="Bogota"
-                        app:layout_constraintBottom_toBottomOf="@+id/iv_city"
-                        app:layout_constraintStart_toEndOf="@+id/iv_city"
-                        app:layout_constraintTop_toTopOf="@+id/iv_city"
-                        tools:text="@{countryDetailViewState.country.capital}" />
-
-                    <ImageView
-                        android:id="@+id/iv_location"
-                        android:layout_width="@dimen/icon_size"
-                        android:layout_height="@dimen/icon_size"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginTop="@dimen/space_16"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/iv_city"
-                        app:srcCompat="@drawable/ic_location" />
-
-                    <TextView
-                        android:id="@+id/tv_region"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginEnd="@dimen/space_16"
-                        android:text="@{countryDetailViewState.country.region}"
-                        app:layout_constraintBottom_toTopOf="@+id/tv_subregion"
-                        app:layout_constraintStart_toEndOf="@+id/iv_location"
-                        app:layout_constraintTop_toTopOf="@+id/iv_location"
-                        tools:text="Americas" />
-
-                    <TextView
-                        android:id="@+id/tv_subregion"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginEnd="@dimen/space_16"
-                        android:layout_marginBottom="8dp"
-                        android:text="@{countryDetailViewState.country.subregion}"
-                        app:layout_constraintBottom_toBottomOf="@+id/iv_location"
-                        app:layout_constraintStart_toEndOf="@+id/iv_location"
-                        app:layout_constraintTop_toBottomOf="@+id/tv_region"
-                        tools:text="South America" />
-
-                    <ImageView
-                        android:id="@+id/iv_people"
-                        android:layout_width="@dimen/icon_size"
-                        android:layout_height="@dimen/icon_size"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginTop="@dimen/space_16"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/iv_location"
-                        app:srcCompat="@drawable/ic_people" />
-
-                    <TextView
-                        android:id="@+id/tv_population"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginEnd="@dimen/space_16"
-                        android:text="@{countryDetailViewState.country.population}"
-                        app:layout_constraintBottom_toBottomOf="@+id/iv_people"
-                        app:layout_constraintStart_toEndOf="@+id/iv_people"
-                        app:layout_constraintTop_toTopOf="@+id/iv_people"
-                        tools:text="48 759 958" />
-
-                    <ImageView
-                        android:id="@+id/iv_currency"
-                        android:layout_width="@dimen/icon_size"
-                        android:layout_height="@dimen/icon_size"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginTop="8dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/iv_area"
-                        app:srcCompat="@drawable/ic_money" />
-
-                    <TextView
-                        android:id="@+id/tv_currency"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginEnd="@dimen/space_16"
-                        android:text="@{countryDetailViewState.country.currrencyDescription}"
-                        app:layout_constraintBottom_toBottomOf="@+id/iv_currency"
-                        app:layout_constraintStart_toEndOf="@+id/iv_currency"
-                        app:layout_constraintTop_toTopOf="@+id/iv_currency"
-                        tools:text="Colombian peso (COP)" />
-
-                    <ImageView
-                        android:id="@+id/iv_language"
-                        android:layout_width="@dimen/icon_size"
-                        android:layout_height="@dimen/icon_size"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginTop="@dimen/space_16"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/iv_currency"
-                        app:srcCompat="@drawable/ic_language" />
-
-                    <TextView
-                        android:id="@+id/tv_language"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginEnd="@dimen/space_16"
-                        android:text="@{countryDetailViewState.country.languageDescription}"
-                        app:layout_constraintBottom_toBottomOf="@+id/iv_language"
-                        app:layout_constraintStart_toEndOf="@+id/iv_language"
-                        app:layout_constraintTop_toTopOf="@+id/iv_language"
-                        tools:text="Spanish" />
-
-                    <ImageView
-                        android:id="@+id/iv_area"
-                        android:layout_width="@dimen/icon_size"
-                        android:layout_height="@dimen/icon_size"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginTop="@dimen/space_16"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/iv_people"
-                        app:srcCompat="@drawable/ic_landscape" />
-
-                    <TextView
-                        android:id="@+id/tv_area"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_16"
-                        android:layout_marginEnd="@dimen/space_16"
-                        android:text="@{@string/area(countryDetailViewState.country.area)}"
-                        app:layout_constraintBottom_toBottomOf="@+id/iv_area"
-                        app:layout_constraintStart_toEndOf="@+id/iv_area"
-                        app:layout_constraintTop_toTopOf="@+id/iv_area"
-                        tools:text="1141748.0" />
-
-                </android.support.constraint.ConstraintLayout>
-
-            </android.support.v4.widget.NestedScrollView>
-
-
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab_add"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/space_16"
-                android:src="@{countryDetailViewState.isFavorite ? @drawable/ic_favorite : @drawable/ic_favorite_border}"
-                app:layout_anchor="@id/app_bar"
-                app:layout_anchorGravity="bottom|right|end" />
+                android:src="@{countryDetailViewState.country.isFavorite ? @drawable/ic_favorite : @drawable/ic_favorite_border}" />
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_properties"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:padding="@dimen/space_16"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/iv_flag"
+                app:list="@{countryDetailViewState.country.countryProperties}"
+                tools:listitem="@layout/item_country_property" />
 
-        </android.support.design.widget.CoordinatorLayout>
+        </androidx.constraintlayout.motion.widget.MotionLayout>
 
-    </FrameLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </layout>

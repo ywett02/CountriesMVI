@@ -1,27 +1,24 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
-
     <style name="TextAppearance.AppTheme.ScreenTitle" parent="TextAppearance.AppCompat.Display1">
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">32sp</item>
         <item name="android:textColor">@color/toolbar_text_color</item>
-        <item name="android:background">@drawable/bg_text</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowRadius">12</item>
+        <item name="android:shadowColor">@android:color/black</item>
     </style>
 
     <style name="TextAppearance.AppTheme.Title.Light" parent="TextAppearance.AppCompat.Title">
         <item name="android:textColor">@color/toolbar_text_color</item>
-    </style>
-
-    <style name="ThemeOverlay.AppTheme.ControlPrimary" parent="ThemeOverlay.AppCompat.Light">
-        <item name="colorControlNormal">@color/colorPrimaryDark</item>
     </style>
 
 </resources>

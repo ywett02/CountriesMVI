@@ -1,29 +1,34 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.widget.Toast
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.jakewharton.rxbinding2.widget.RxSearchView
+import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
-import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
+import com.jurcikova.ivet.countries.mvi.common.bundleOf
+import com.jurcikova.ivet.countries.mvi.common.hideKeyboard
+import com.jurcikova.ivet.countries.mvi.common.navigate
+import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailFragment.Companion.countryName
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
-import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountrySearchBinding
-import com.strv.ktools.inject
 import com.strv.ktools.logD
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
 class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, CountrySearchIntent, CountrySearchViewState>() {
 
     private val adapter by inject<CountryAdapter>()
 
-    private val viewModel: CountrySearchViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProviders.of(this).get(CountrySearchViewModel::class.java)
-    }
+    private val countrySearchViewModel: CountrySearchViewModel by viewModel()
+
+    private val addToFavoritePublisher = PublishSubject.create<CountrySearchIntent.AddToFavoriteIntent>()
+    private val removeFromFavoritePublisher = PublishSubject.create<CountrySearchIntent.RemoveFromFavoriteIntent>()
 
     private val searchIntent by lazy {
         RxSearchView.queryTextChanges(binding.searchView)
@@ -43,7 +48,7 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.states().observe(this, Observer { state ->
+        countrySearchViewModel.states().observe(this, Observer { state ->
             logD("state: Search $state")
             render(state!!)
         })
@@ -53,10 +58,18 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
         setupListView()
     }
 
-    override fun intents() = searchIntent as Observable<CountrySearchIntent>
+    override fun intents() = Observable.merge(
+            searchIntent,
+            addToFavoriteIntent(),
+            removeFromFavoriteIntent()
+    )
 
     override fun render(state: CountrySearchViewState) {
         binding.model = state
+
+        if (state.message != null) {
+            showMessage(state.message)
+        }
 
         if (state.error != null) {
             showErrorMessage(state.error)
@@ -65,22 +78,44 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
 
     override fun startStream() {
         // Pass the UI's intents to the ViewModel
-        viewModel.processIntents(intents())
+        countrySearchViewModel.processIntents(intents())
     }
 
     private fun setupListView() {
         binding.rvCountries.layoutManager = LinearLayoutManager(activity)
+        (binding.rvCountries.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         binding.rvCountries.adapter = adapter
 
         adapter.countryClickObservable.observe(this, Observer { country ->
-            val action = CountrySearchFragmentDirections.actionCountrySearchFragmentToCountryDetailFragment(country!!.name)
-            findNavController().navigate(action)
+            hideKeyboard()
+            navigate(R.id.action_countrySearchFragment_to_countryDetailFragment, bundleOf(countryName to country!!.name))
+        })
+
+        adapter.favoriteButtonClickObservable.observe(this, Observer {
+            if (it.isFavorite) {
+                removeFromFavoritePublisher.onNext(CountrySearchIntent.RemoveFromFavoriteIntent(it.name))
+            } else {
+                addToFavoritePublisher.onNext(CountrySearchIntent.AddToFavoriteIntent(it.name))
+            }
         })
     }
 
+    private fun addToFavoriteIntent(): Observable<CountrySearchIntent.AddToFavoriteIntent> =
+            addToFavoritePublisher
+
+    private fun removeFromFavoriteIntent(): Observable<CountrySearchIntent.RemoveFromFavoriteIntent> =
+            removeFromFavoritePublisher
+
+    private fun showMessage(messageType: MessageType) {
+        showMessage(getString(R.string.toast_favorite_message,
+                if (messageType is MessageType.AddToFavorite) {
+                    getString(R.string.toast_favorite_message_marked)
+                } else {
+                    getString(R.string.toast_favorite_message_unmarked)
+                }))
+    }
+
     private fun showErrorMessage(exception: Throwable) {
-        activity?.let {
-            Toast.makeText(it, "Error during fetching from api ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
-        }
+        showMessage(exception.localizedMessage)
     }
 }
