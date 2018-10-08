@@ -1,18 +1,11 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.search
 
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountrySearchInteractor
-import com.jurcikova.ivet.countries.mvi.common.consumeEach
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
-import com.strv.ktools.inject
 import com.strv.ktools.logD
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.experimental.channels.flatMap
-import kotlinx.coroutines.experimental.channels.map
+import kotlinx.coroutines.experimental.channels.*
 
-class CountrySearchViewModel : BaseViewModel<CountrySearchIntent, CountrySearchAction, CountrySearchResult, CountrySearchViewState>() {
-
-    private val countrySearchInteractor by inject<CountrySearchInteractor>()
+class CountrySearchViewModel(val countrySearchInteractor: CountrySearchInteractor) : BaseViewModel<CountrySearchIntent, CountrySearchAction, CountrySearchResult, CountrySearchViewState>() {
 
     override val state: ConflatedBroadcastChannel<CountrySearchViewState> = ConflatedBroadcastChannel(CountrySearchViewState.idle())
 
@@ -46,7 +39,9 @@ class CountrySearchViewModel : BaseViewModel<CountrySearchIntent, CountrySearchA
                 }
                 .flatMap { action ->
                     logD("action: $action")
-                    countrySearchInteractor.processAction(action)
+                    countrySearchInteractor.run {
+                        processAction(action)
+                    }
                 }.consumeEach { result ->
                     logD("result: $result")
                     state.offer(reducer(state.value, result))

@@ -4,23 +4,21 @@ import com.jurcikova.ivet.countries.mvi.business.repository.CountryRepository
 import com.jurcikova.ivet.countries.mvi.mvibase.MviInteractor
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailAction
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailResult
-import com.strv.ktools.inject
+import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.channels.produce
 import kotlinx.coroutines.experimental.delay
 
-class CountryDetailInteractor : MviInteractor<CountryDetailAction, CountryDetailResult> {
+class CountryDetailInteractor(val countryRepository: CountryRepository) : MviInteractor<CountryDetailAction, CountryDetailResult> {
 
-    private val countryRepository by inject<CountryRepository>()
-
-    override suspend fun processAction(action: CountryDetailAction): ReceiveChannel<CountryDetailResult> =
+    override fun CoroutineScope.processAction(action: CountryDetailAction): ReceiveChannel<CountryDetailResult> =
             when (action) {
                 is CountryDetailAction.LoadCountryDetailAction -> produceLoadCountryDetailAction(action.countryName)
                 is CountryDetailAction.AddToFavoriteAction -> produceAddToFavoriteAction()
                 is CountryDetailAction.RemoveFromFavoriteAction -> produceRemoveFromFavoriteAction()
             }
 
-    private fun produceLoadCountryDetailAction(name: String) = produce<CountryDetailResult> {
+    private fun CoroutineScope.produceLoadCountryDetailAction(name: String?) = produce<CountryDetailResult> {
         send(CountryDetailResult.LoadCountryDetailResult.InProgress)
         send(
                 try {
@@ -31,13 +29,13 @@ class CountryDetailInteractor : MviInteractor<CountryDetailAction, CountryDetail
         )
     }
 
-    private fun produceAddToFavoriteAction() = produce<CountryDetailResult> {
+    private fun CoroutineScope.produceAddToFavoriteAction() = produce<CountryDetailResult> {
         send(CountryDetailResult.AddToFavoriteResult.Success)
         delay(2000)
         send(CountryDetailResult.AddToFavoriteResult.Reset)
     }
 
-    private fun produceRemoveFromFavoriteAction() = produce<CountryDetailResult> {
+    private fun CoroutineScope.produceRemoveFromFavoriteAction() = produce<CountryDetailResult> {
         send(CountryDetailResult.RemoveFromFavoriteResult.Success)
         delay(2000)
         send(CountryDetailResult.RemoveFromFavoriteResult.Reset)

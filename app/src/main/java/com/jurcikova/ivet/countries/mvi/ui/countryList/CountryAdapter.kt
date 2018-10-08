@@ -1,10 +1,10 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList
 
-import android.support.v7.recyclerview.extensions.ListAdapter
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
 import com.jurcikova.ivet.countries.mvi.common.OnItemClickListener
 import com.jurcikova.ivet.mvi.databinding.ItemCountryBinding

@@ -1,6 +1,5 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.widget.Toast
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
@@ -9,22 +8,24 @@ import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.channels.consume
 import kotlinx.coroutines.experimental.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>() {
 
-    private val viewModel: CountryDetailViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProviders.of(this).get(CountryDetailViewModel::class.java)
+    companion object {
+        const val countryName = "countryName"
     }
+
+    private val viewModel: CountryDetailViewModel by viewModel()
 
     override val binding: FragmentCountryDetailBinding by BindFragment(R.layout.fragment_country_detail)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        launch(UI, parent = job) {
+        launch {
             viewModel.state.consume {
                 for (state in this) {
                     logD("state: $state")
@@ -37,15 +38,15 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     }
 
     override fun startStream() {
-        launch(UI, parent = job) { viewModel.processIntents(intents) }
+        launch { viewModel.processIntents(intents) }
     }
 
     override fun setupIntents() {
-        launch(UI, parent = job) {
-            intents.send(CountryDetailIntent.InitialIntent(CountryDetailFragmentArgs.fromBundle(arguments).argCountryName))
+        launch {
+            intents.send(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)))
         }
 
-        binding.fabAdd.setOnClick(job) {
+        binding.fabAdd.setOnClick(this) {
             viewModel.state.value.let {
                 if (it.isFavorite) intents.send(CountryDetailIntent.RemoveFromFavoriteIntent(it.country!!.name))
                 else intents.send(CountryDetailIntent.AddToFavoriteIntent(it.country!!.name))

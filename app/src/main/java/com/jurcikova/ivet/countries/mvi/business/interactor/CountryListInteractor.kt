@@ -5,22 +5,20 @@ import com.jurcikova.ivet.countries.mvi.mvibase.MviInteractor
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult
-import com.strv.ktools.inject
+import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.channels.produce
 
-class CountryListInteractor : MviInteractor<CountryListAction, CountryListResult> {
+class CountryListInteractor(val countryRepository: CountryRepository) : MviInteractor<CountryListAction, CountryListResult> {
 
-    private val countryRepository by inject<CountryRepository>()
-
-    override suspend fun processAction(action: CountryListAction): ReceiveChannel<CountryListResult> =
+    override fun CoroutineScope.processAction(action: CountryListAction): ReceiveChannel<CountryListResult> =
             when (action) {
                 is LoadCountriesAction -> {
                     produceLoadCountriesResult(action.isRefreshing)
                 }
             }
 
-    private fun produceLoadCountriesResult(isRefreshing: Boolean) = produce<CountryListResult> {
+    private fun CoroutineScope.produceLoadCountriesResult(isRefreshing: Boolean) = produce<CountryListResult> {
         send(CountryListResult.LoadCountriesResult.InProgress(isRefreshing))
         send(
                 try {

@@ -1,37 +1,32 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
-import com.jurcikova.ivet.countries.mvi.common.consumeEach
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
-import com.strv.ktools.inject
 import com.strv.ktools.logD
 import kotlinx.coroutines.experimental.channels.*
 
-class CountryDetailViewModel : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
-
-    private val countryDetailInteractor by inject<CountryDetailInteractor>()
-    private var processedInitialIntent = false
+class CountryDetailViewModel(val countryDetailInteractor: CountryDetailInteractor) : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
 
     override val state = ConflatedBroadcastChannel(CountryDetailViewState.idle())
 
     override fun reducer(previousState: CountryDetailViewState, result: CountryDetailResult) =
             when (result) {
                 is CountryDetailResult.LoadCountryDetailResult -> when (result) {
-                    is CountryDetailResult.LoadCountryDetailResult.Success -> previousState.copy(isLoading = false, country = result.country)
-                    is CountryDetailResult.LoadCountryDetailResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                    is CountryDetailResult.LoadCountryDetailResult.Success -> previousState.copyState(isLoading = false, country = result.country)
+                    is CountryDetailResult.LoadCountryDetailResult.Failure -> previousState.copyState(isLoading = false, error = result.error)
                     is CountryDetailResult.LoadCountryDetailResult.InProgress -> previousState.copy(isLoading = true)
                 }
                 is CountryDetailResult.AddToFavoriteResult -> when (result) {
-                    is CountryDetailResult.AddToFavoriteResult.Success -> previousState.copy(isLoading = false, isFavorite = true, showMessage = true)
-                    is CountryDetailResult.AddToFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                    is CountryDetailResult.AddToFavoriteResult.Success -> previousState.copyState(isLoading = false, isFavorite = true, showMessage = true)
+                    is CountryDetailResult.AddToFavoriteResult.Failure -> previousState.copyState(isLoading = false, error = result.error)
                     is CountryDetailResult.AddToFavoriteResult.InProgress -> previousState.copy(isLoading = true)
-                    is CountryDetailResult.AddToFavoriteResult.Reset -> previousState.copy(showMessage = false)
+                    is CountryDetailResult.AddToFavoriteResult.Reset -> previousState.copyState(showMessage = false)
                 }
                 is CountryDetailResult.RemoveFromFavoriteResult -> when (result) {
-                    is CountryDetailResult.RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, isFavorite = false, showMessage = true)
-                    is CountryDetailResult.RemoveFromFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                    is CountryDetailResult.RemoveFromFavoriteResult.Success -> previousState.copyState(isLoading = false, isFavorite = false, showMessage = true)
+                    is CountryDetailResult.RemoveFromFavoriteResult.Failure -> previousState.copyState(isLoading = false, error = result.error)
                     is CountryDetailResult.RemoveFromFavoriteResult.InProgress -> previousState.copy(isLoading = true)
-                    is CountryDetailResult.RemoveFromFavoriteResult.Reset -> previousState.copy(showMessage = false)
+                    is CountryDetailResult.RemoveFromFavoriteResult.Reset -> previousState.copyState(showMessage = false)
                 }
             }
 
@@ -46,7 +41,9 @@ class CountryDetailViewModel : BaseViewModel<CountryDetailIntent, CountryDetailA
                 }
                 .flatMap { action ->
                     logD("action: $action")
-                    countryDetailInteractor.processAction(action)
+                    countryDetailInteractor.run {
+                        processAction(action)
+                    }
                 }.consumeEach { result ->
                     logD("result: $result")
                     state.offer(reducer(state.value, result))
@@ -61,8 +58,5 @@ class CountryDetailViewModel : BaseViewModel<CountryDetailIntent, CountryDetailA
             }
 
     private fun intentFilter(intent: CountryDetailIntent): Boolean =
-            if (intent is CountryDetailIntent.InitialIntent && !processedInitialIntent) {
-                processedInitialIntent = true
-                true
-            } else !(intent is CountryDetailIntent.InitialIntent && processedInitialIntent)
+            !(intent is CountryDetailIntent.InitialIntent && state.value.initialIntentProcessed)
 }

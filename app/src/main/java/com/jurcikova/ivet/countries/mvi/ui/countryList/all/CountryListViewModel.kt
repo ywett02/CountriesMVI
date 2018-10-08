@@ -1,20 +1,16 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.all
 
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor
-import com.jurcikova.ivet.countries.mvi.common.consumeEach
 import com.jurcikova.ivet.countries.mvi.ui.BaseViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.SwipeToRefresh
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.LoadCountriesResult
-import com.strv.ktools.inject
 import com.strv.ktools.logD
+import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.channels.*
 
-class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
-
-    private val countryListInteractor by inject<CountryListInteractor>()
-    private var processedInitialIntent = false
+class CountryListViewModel(val countryListInteractor: CountryListInteractor) : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>(), CoroutineScope {
 
     override val state = ConflatedBroadcastChannel(CountryListViewState.idle())
 
@@ -22,14 +18,13 @@ class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction,
             when (result) {
                 is LoadCountriesResult -> when (result) {
                     is LoadCountriesResult.Success -> {
-                        previousState.copy(
+                        previousState.copyState(
                                 isLoading = false,
                                 isRefreshing = false,
                                 countries = result.countries
-
                         )
                     }
-                    is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, isRefreshing = false, error = result.error)
+                    is LoadCountriesResult.Failure -> previousState.copyState(isLoading = false, isRefreshing = false, error = result.error)
                     is LoadCountriesResult.InProgress -> {
                         if (result.isRefreshing) {
                             previousState.copy(isLoading = false, isRefreshing = true)
@@ -49,7 +44,9 @@ class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction,
                 }
                 .flatMap { action ->
                     logD("action: $action")
-                    countryListInteractor.processAction(action)
+                    countryListInteractor.run {
+                        processAction(action)
+                    }
                 }.consumeEach { result ->
                     logD("result: $result")
                     state.offer(reducer(state.value, result))
@@ -63,9 +60,6 @@ class CountryListViewModel : BaseViewModel<CountryListIntent, CountryListAction,
             }
 
     private fun intentFilter(intent: CountryListIntent): Boolean =
-            if (intent is InitialIntent && !processedInitialIntent) {
-                processedInitialIntent = true
-                true
-            } else !(intent is InitialIntent && processedInitialIntent)
+            !(intent is InitialIntent && state.value.initialIntentProcessed)
 
 }

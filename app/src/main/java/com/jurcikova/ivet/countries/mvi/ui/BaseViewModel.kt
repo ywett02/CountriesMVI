@@ -1,9 +1,23 @@
 package com.jurcikova.ivet.countries.mvi.ui
 
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import com.jurcikova.ivet.countries.mvi.mvibase.*
+import kotlinx.coroutines.experimental.CoroutineScope
+import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.Job
+import kotlin.coroutines.experimental.CoroutineContext
 
-abstract class BaseViewModel<I : MviIntent, A : MviAction, R : MviResult, S : MviViewState> : ViewModel(), MviViewModel<I, S> {
+abstract class BaseViewModel<I : MviIntent, A : MviAction, R : MviResult, S : MviViewState> : ViewModel(), MviViewModel<I, S>, CoroutineScope {
+
+    val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
+
+    override fun onCleared() {
+        super.onCleared()
+        job.cancel()
+    }
 
     /**
      * The Reducer is where [MviViewState], that the [MviView] will use to

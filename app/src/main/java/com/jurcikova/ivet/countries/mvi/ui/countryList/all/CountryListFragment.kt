@@ -1,23 +1,26 @@
 package com.jurcikova.ivet.countries.mvi.ui.countryList.all
 
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
 import android.widget.Toast
-import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.common.OnItemClickListener
+import com.jurcikova.ivet.countries.mvi.common.bundleOf
+import com.jurcikova.ivet.countries.mvi.common.navigate
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailFragment.Companion.countryName
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryListBinding
 import com.strv.ktools.logD
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.channels.consume
 import kotlinx.coroutines.experimental.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryListIntent, CountryListViewState>() {
+
+    private val viewModel: CountryListViewModel by viewModel()
 
     private val adapter = CountryAdapter(object : OnItemClickListener<Country> {
         override fun onItemClick(item: Country) {
@@ -25,16 +28,12 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
         }
     })
 
-    private val viewModel: CountryListViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProviders.of(this).get(CountryListViewModel::class.java)
-    }
-
     override val binding: FragmentCountryListBinding by BindFragment(R.layout.fragment_country_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        launch(UI, parent = job) {
+        launch() {
             viewModel.state.consume {
                 for (state in this) {
                     logD("state: $state")
@@ -45,19 +44,19 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
     }
 
     override fun setupIntents() {
-        launch(UI, parent = job) {
+        launch {
             intents.send(CountryListIntent.InitialIntent)
         }
 
         binding.swiperefresh.setOnRefreshListener {
-            launch(UI, parent = job) {
+            launch {
                 intents.send(CountryListIntent.SwipeToRefresh)
             }
         }
     }
 
     override fun startStream() {
-        launch(UI, parent = job) { viewModel.processIntents(intents) }
+        launch { viewModel.processIntents(intents) }
     }
 
     override fun initViews() {
@@ -84,7 +83,6 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
     }
 
     private fun showCountryDetail(name: String) {
-        val action = CountryListFragmentDirections.actionCountryListFragmentToCountryDetailFragment(name)
-        findNavController().navigate(action)
+        navigate(R.id.action_countryListFragment_to_countryDetailFragment, bundleOf(countryName to name))
     }
 }
