@@ -18,13 +18,14 @@ class CountryListViewModel(val countryListInteractor: CountryListInteractor) : B
             when (result) {
                 is LoadCountriesResult -> when (result) {
                     is LoadCountriesResult.Success -> {
-                        previousState.copyState(
+                        previousState.copy(
                                 isLoading = false,
                                 isRefreshing = false,
-                                countries = result.countries
+                                countries = result.countries,
+                                initial = false
                         )
                     }
-                    is LoadCountriesResult.Failure -> previousState.copyState(isLoading = false, isRefreshing = false, error = result.error)
+                    is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, isRefreshing = false, error = result.error, initial = false)
                     is LoadCountriesResult.InProgress -> {
                         if (result.isRefreshing) {
                             previousState.copy(isLoading = false, isRefreshing = true)
@@ -35,9 +36,6 @@ class CountryListViewModel(val countryListInteractor: CountryListInteractor) : B
 
     override suspend fun processIntents(channel: Channel<CountryListIntent>) {
         channel
-                .filter { intent ->
-                    intentFilter(intent)
-                }
                 .map { intent ->
                     logD("intent: $intent")
                     actionFromIntent(intent)
@@ -58,8 +56,4 @@ class CountryListViewModel(val countryListInteractor: CountryListInteractor) : B
                 is InitialIntent -> LoadCountriesAction(false)
                 is SwipeToRefresh -> LoadCountriesAction(true)
             }
-
-    private fun intentFilter(intent: CountryListIntent): Boolean =
-            !(intent is InitialIntent && state.value.initialIntentProcessed)
-
 }

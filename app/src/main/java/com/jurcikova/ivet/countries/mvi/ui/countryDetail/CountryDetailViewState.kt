@@ -9,7 +9,7 @@ data class CountryDetailViewState(
         val error: Throwable?,
         val isFavorite: Boolean,
         val showMessage: Boolean,
-        val initialIntentProcessed: Boolean
+        val initial: Boolean
 ) : MviViewState {
     companion object {
         fun idle(): CountryDetailViewState {
@@ -19,15 +19,8 @@ data class CountryDetailViewState(
                     error = null,
                     isFavorite = false,
                     showMessage = false,
-                    initialIntentProcessed = false
+                    initial = true
             )
         }
     }
-
-    fun copyState(isLoading: Boolean = this.isLoading,
-                  country: Country? = this.country,
-                  error: Throwable? = this.error,
-                  isFavorite: Boolean = this.isFavorite,
-                  showMessage: Boolean = this.showMessage) =
-            CountryDetailViewState(isLoading, country, error, isFavorite, showMessage, true)
 }

@@ -12,29 +12,26 @@ class CountryDetailViewModel(val countryDetailInteractor: CountryDetailInteracto
     override fun reducer(previousState: CountryDetailViewState, result: CountryDetailResult) =
             when (result) {
                 is CountryDetailResult.LoadCountryDetailResult -> when (result) {
-                    is CountryDetailResult.LoadCountryDetailResult.Success -> previousState.copyState(isLoading = false, country = result.country)
-                    is CountryDetailResult.LoadCountryDetailResult.Failure -> previousState.copyState(isLoading = false, error = result.error)
+                    is CountryDetailResult.LoadCountryDetailResult.Success -> previousState.copy(isLoading = false, country = result.country, initial = false)
+                    is CountryDetailResult.LoadCountryDetailResult.Failure -> previousState.copy(isLoading = false, error = result.error, initial = false)
                     is CountryDetailResult.LoadCountryDetailResult.InProgress -> previousState.copy(isLoading = true)
                 }
                 is CountryDetailResult.AddToFavoriteResult -> when (result) {
-                    is CountryDetailResult.AddToFavoriteResult.Success -> previousState.copyState(isLoading = false, isFavorite = true, showMessage = true)
-                    is CountryDetailResult.AddToFavoriteResult.Failure -> previousState.copyState(isLoading = false, error = result.error)
+                    is CountryDetailResult.AddToFavoriteResult.Success -> previousState.copy(isLoading = false, isFavorite = true, showMessage = true, initial = false)
+                    is CountryDetailResult.AddToFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error, initial = false)
                     is CountryDetailResult.AddToFavoriteResult.InProgress -> previousState.copy(isLoading = true)
-                    is CountryDetailResult.AddToFavoriteResult.Reset -> previousState.copyState(showMessage = false)
+                    is CountryDetailResult.AddToFavoriteResult.Reset -> previousState.copy(showMessage = false)
                 }
                 is CountryDetailResult.RemoveFromFavoriteResult -> when (result) {
-                    is CountryDetailResult.RemoveFromFavoriteResult.Success -> previousState.copyState(isLoading = false, isFavorite = false, showMessage = true)
-                    is CountryDetailResult.RemoveFromFavoriteResult.Failure -> previousState.copyState(isLoading = false, error = result.error)
+                    is CountryDetailResult.RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, isFavorite = false, showMessage = true, initial = false)
+                    is CountryDetailResult.RemoveFromFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error, initial = false)
                     is CountryDetailResult.RemoveFromFavoriteResult.InProgress -> previousState.copy(isLoading = true)
-                    is CountryDetailResult.RemoveFromFavoriteResult.Reset -> previousState.copyState(showMessage = false)
+                    is CountryDetailResult.RemoveFromFavoriteResult.Reset -> previousState.copy(showMessage = false)
                 }
             }
 
     override suspend fun processIntents(channel: Channel<CountryDetailIntent>) {
         channel
-                .filter { intent ->
-                    intentFilter(intent)
-                }
                 .map { intent ->
                     logD("intent: $intent")
                     actionFromIntent(intent)
@@ -56,7 +53,4 @@ class CountryDetailViewModel(val countryDetailInteractor: CountryDetailInteracto
                 is CountryDetailIntent.AddToFavoriteIntent -> CountryDetailAction.AddToFavoriteAction(intent.countryName)
                 is CountryDetailIntent.RemoveFromFavoriteIntent -> CountryDetailAction.RemoveFromFavoriteAction(intent.countryName)
             }
-
-    private fun intentFilter(intent: CountryDetailIntent): Boolean =
-            !(intent is CountryDetailIntent.InitialIntent && state.value.initialIntentProcessed)
 }

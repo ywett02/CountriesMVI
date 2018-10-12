@@ -7,7 +7,7 @@ data class CountryListViewState(val isLoading: Boolean,
                                 val isRefreshing: Boolean,
                                 val countries: List<Country>,
                                 val error: Throwable?,
-                                val initialIntentProcessed: Boolean) : MviViewState {
+                                val initial: Boolean) : MviViewState {
     companion object {
         fun idle(): CountryListViewState {
             return CountryListViewState(
@@ -15,15 +15,8 @@ data class CountryListViewState(val isLoading: Boolean,
                     isRefreshing = false,
                     countries = emptyList(),
                     error = null,
-                    initialIntentProcessed = false
+                    initial = true
             )
         }
     }
-
-
-    fun copyState(isLoading: Boolean = this.isLoading,
-                  isRefreshing: Boolean = this.isRefreshing,
-                  countries: List<Country> = this.countries,
-                  error: Throwable? = this.error) =
-            CountryListViewState(isLoading, isRefreshing, countries, error, true)
 }

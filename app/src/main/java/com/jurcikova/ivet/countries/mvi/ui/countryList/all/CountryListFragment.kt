@@ -3,6 +3,7 @@ package com.jurcikova.ivet.countries.mvi.ui.countryList.all
 import android.os.Bundle
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.common.OnItemClickListener
@@ -44,10 +45,6 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
     }
 
     override fun setupIntents() {
-        launch {
-            intents.send(CountryListIntent.InitialIntent)
-        }
-
         binding.swiperefresh.setOnRefreshListener {
             launch {
                 intents.send(CountryListIntent.SwipeToRefresh)
@@ -65,6 +62,12 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
 
     override fun render(state: CountryListViewState) {
         binding.model = state
+
+        if (state.initial) {
+            launch {
+                intents.send(CountryListIntent.InitialIntent)
+            }
+        }
 
         if (state.error != null) {
             showErrorMessage(state.error)

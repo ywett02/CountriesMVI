@@ -42,10 +42,6 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     }
 
     override fun setupIntents() {
-        launch {
-            intents.send(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)))
-        }
-
         binding.fabAdd.setOnClick(this) {
             viewModel.state.value.let {
                 if (it.isFavorite) intents.send(CountryDetailIntent.RemoveFromFavoriteIntent(it.country!!.name))
@@ -59,6 +55,12 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
 
     override fun render(state: CountryDetailViewState) {
         binding.countryDetailViewState = state
+
+        if (state.initial) {
+            launch {
+                intents.send(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)))
+            }
+        }
 
         if (state.showMessage) {
             showMessage(state.isFavorite)
