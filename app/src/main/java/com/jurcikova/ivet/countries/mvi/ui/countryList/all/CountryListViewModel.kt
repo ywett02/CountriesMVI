@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveDataReactiveStreams
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
 import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor
-import com.jurcikova.ivet.countries.mvi.common.notOfType
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseViewModel
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction.LoadCountriesAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListIntent.InitialIntent
@@ -13,24 +12,9 @@ import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListResult.*
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
-import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 
 class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
-
-    /**
-     * take only the first ever InitialIntent and all intents of other types
-     * to avoid reloading data on config changes
-     */
-    private val initialIntentFilter: ObservableTransformer<CountryListIntent, CountryListIntent>
-        get() = ObservableTransformer { intents ->
-            intents.publish { selected ->
-                Observable.merge(
-                        selected.ofType(InitialIntent::class.java).take(1),
-                        selected.notOfType(InitialIntent::class.java)
-                )
-            }
-        }
 
     override val reducer = BiFunction { previousState: CountryListViewState, result: CountryListResult ->
         when (result) {
@@ -42,10 +26,11 @@ class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseV
                             isRefreshing = false,
                             filterType = filterType,
                             countries = applyFilters(result.countries, filterType),
-                            error = null
+                            error = null,
+                            initial = false
                     )
                 }
-                is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                is LoadCountriesResult.Failure -> previousState.copy(isLoading = false, error = result.error, initial = false)
                 is LoadCountriesResult.InProgress -> {
                     if (result.isRefreshing) {
                         previousState.copy(isLoading = false, isRefreshing = true)
@@ -69,7 +54,6 @@ class CountryListViewModel(countryListInteractor: CountryListInteractor) : BaseV
     }
 
     override val statesObservable: Observable<CountryListViewState> = intentsSubject
-            .compose(initialIntentFilter)
             .map(this::actionFromIntent)
             .doOnNext { action ->
                 logD("action: $action")

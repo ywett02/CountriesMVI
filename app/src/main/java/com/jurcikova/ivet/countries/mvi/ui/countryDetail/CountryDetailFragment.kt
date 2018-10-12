@@ -7,9 +7,11 @@ import com.jakewharton.rxbinding2.view.RxView
 import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
+import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -23,9 +25,7 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
 
     private val adapter by inject<CountryPropertyAdapter>()
 
-    private val initialIntent by lazy {
-        Observable.just(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)) as CountryDetailIntent)
-    }
+    private val initialIntentPublisher = PublishSubject.create<CountryDetailIntent.InitialIntent>()
 
     private val favoriteButtonClickedIntent by lazy {
         RxView.clicks(binding.fabAdd).flatMap {
@@ -61,12 +61,16 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     }
 
     override fun intents(): Observable<CountryDetailIntent> = Observable.merge(
-            initialIntent,
+            initialIntent(),
             favoriteButtonClickedIntent
     )
 
     override fun render(state: CountryDetailViewState) {
         binding.countryDetailViewState = state
+
+        if (state.initial) {
+            initialIntentPublisher.onNext(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)))
+        }
 
         if (state.message != null) {
             showMessage(state.message)
@@ -94,4 +98,6 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     private fun showErrorMessage(exception: Throwable) {
         showMessage(exception.localizedMessage)
     }
+
+    private fun initialIntent(): Observable<CountryDetailIntent.InitialIntent> = initialIntentPublisher
 }

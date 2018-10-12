@@ -2,8 +2,8 @@ package com.jurcikova.ivet.countries.mvi.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
 import com.jurcikova.ivet.countries.mvi.common.BindActivity
-import com.jurcikova.ivet.countries.mvi.common.findNavController
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.ActivityMainBinding
 

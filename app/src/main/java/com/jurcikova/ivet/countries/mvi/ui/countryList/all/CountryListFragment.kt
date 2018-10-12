@@ -15,6 +15,7 @@ import com.jurcikova.ivet.countries.mvi.common.navigate
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailFragment.Companion.countryName
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
+import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryListBinding
 import com.strv.ktools.logD
 import io.reactivex.Observable
@@ -24,9 +25,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryListIntent, CountryListViewState>() {
 
-    private val initialIntent by lazy {
-        Observable.just(CountryListIntent.InitialIntent)
-    }
+    private val initialIntentPublisher = PublishSubject.create<CountryListIntent.InitialIntent>()
 
     private val swipeToRefreshIntent by lazy {
         binding.swiperefresh.refreshes()
@@ -73,7 +72,7 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
     }
 
     override fun intents() = Observable.merge(
-            initialIntent,
+            initialIntent(),
             swipeToRefreshIntent,
             changeFilterIntent(),
             addToFavoriteIntent()
@@ -82,6 +81,10 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
 
     override fun render(state: CountryListViewState) {
         binding.model = state
+
+        if (state.initial) {
+            initialIntentPublisher.onNext(CountryListIntent.InitialIntent)
+        }
 
         if (state.message != null) {
             showMessage(state.message)
@@ -114,6 +117,9 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
             navigate(R.id.action_countryListFragment_to_countryDetailFragment, bundleOf(countryName to country!!.name))
         })
     }
+
+    private fun initialIntent(): Observable<CountryListIntent.InitialIntent> =
+            initialIntentPublisher
 
     private fun changeFilterIntent(): Observable<CountryListIntent.ChangeFilterIntent> =
             changeFilterPublisher

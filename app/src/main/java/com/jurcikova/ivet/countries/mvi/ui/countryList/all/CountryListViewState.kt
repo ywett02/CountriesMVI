@@ -9,7 +9,8 @@ data class CountryListViewState(val isLoading: Boolean,
                                 val countries: List<Country>,
                                 val filterType: FilterType,
                                 val error: Throwable?,
-                                val message: MessageType?) : MviViewState {
+                                val message: MessageType?,
+                                val initial: Boolean) : MviViewState {
     companion object {
         fun idle(): CountryListViewState {
             return CountryListViewState(
@@ -18,7 +19,8 @@ data class CountryListViewState(val isLoading: Boolean,
                     countries = emptyList(),
                     filterType = FilterType.All,
                     error = null,
-                    message = null
+                    message = null,
+                    initial = true
             )
         }
     }

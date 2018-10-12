@@ -8,7 +8,8 @@ data class CountryDetailViewState(
         val isLoading: Boolean,
         val country: Country?,
         val error: Throwable?,
-        val message: MessageType?
+        val message: MessageType?,
+        val initial: Boolean
 ) : MviViewState {
     companion object {
         fun idle(): CountryDetailViewState {
@@ -16,7 +17,8 @@ data class CountryDetailViewState(
                     isLoading = false,
                     country = null,
                     error = null,
-                    message = null
+                    message = null,
+                    initial = true
             )
         }
     }

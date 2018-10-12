@@ -4,31 +4,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.LiveDataReactiveStreams
 import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
-import com.jurcikova.ivet.countries.mvi.common.notOfType
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseViewModel
 import com.strv.ktools.logD
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
-import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 
 class CountryDetailViewModel(countryDetailInteractor: CountryDetailInteractor) : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
 
-    private val intentFilter: ObservableTransformer<CountryDetailIntent, CountryDetailIntent>
-        get() = ObservableTransformer { intents ->
-            intents.publish { selected ->
-                Observable.merge(
-                        selected.ofType(CountryDetailIntent.InitialIntent::class.java).take(1),
-                        selected.notOfType(CountryDetailIntent.InitialIntent::class.java)
-                )
-            }
-        }
-
     override val reducer = BiFunction { previousState: CountryDetailViewState, result: CountryDetailResult ->
         when (result) {
             is CountryDetailResult.LoadCountryDetailResult -> when (result) {
-                is CountryDetailResult.LoadCountryDetailResult.Success -> previousState.copy(isLoading = false, country = result.country)
-                is CountryDetailResult.LoadCountryDetailResult.Failure -> previousState.copy(isLoading = false, error = result.error)
+                is CountryDetailResult.LoadCountryDetailResult.Success -> previousState.copy(isLoading = false, country = result.country, initial = false)
+                is CountryDetailResult.LoadCountryDetailResult.Failure -> previousState.copy(isLoading = false, error = result.error, initial = false)
                 is CountryDetailResult.LoadCountryDetailResult.InProgress -> previousState.copy(isLoading = true)
             }
             is CountryDetailResult.AddToFavoriteResult -> when (result) {
@@ -47,7 +35,6 @@ class CountryDetailViewModel(countryDetailInteractor: CountryDetailInteractor) :
     }
 
     override val statesObservable: Observable<CountryDetailViewState> = intentsSubject
-            .compose(intentFilter)
             .map(this::actionFromIntent)
             .doOnNext { action ->
                 logD("action: $action")
