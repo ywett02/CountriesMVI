@@ -9,6 +9,6 @@ class App : Application() {
         super.onCreate()
 
         setLogTag("CountriesMVI")
-        startKoin(this, listOf(apiModule, viewModelModule))
+        startKoin(this, listOf(apiModule, viewModelModule, databaseModule))
     }
 }

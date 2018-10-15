@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
+import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
-import com.jurcikova.ivet.countries.mvi.common.OnItemClickListener
+import com.jurcikova.ivet.countries.mvi.common.OnCountryClickListener
 import com.jurcikova.ivet.countries.mvi.common.bundleOf
 import com.jurcikova.ivet.countries.mvi.common.navigate
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
@@ -16,7 +18,6 @@ import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountrySearchBinding
 import com.strv.ktools.logD
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.channels.consume
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
@@ -26,9 +27,25 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
 
     private val viewModel: CountrySearchViewModel by viewModel()
 
-    private val adapter = CountryAdapter(object : OnItemClickListener<Country> {
-        override fun onItemClick(item: Country) {
-            showCountryDetail(item.name)
+    private val adapter = CountryAdapter(object : OnCountryClickListener {
+        override fun onFavoriteClick(country: Country) {
+            if (country.isFavorite) {
+                launch {
+                    viewModel.run {
+                        processIntents().send(CountrySearchIntent.RemoveFromFavoriteIntent(country.name))
+                    }
+                }
+            } else {
+                launch {
+                    viewModel.run {
+                        processIntents().send(CountrySearchIntent.AddToFavoriteIntent(country.name))
+                    }
+                }
+            }
+        }
+
+        override fun onCountryClick(country: Country) {
+            showCountryDetail(country.name)
         }
     })
 
@@ -49,10 +66,6 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
         setupIntents()
     }
 
-    override fun startStream() {
-        launch { viewModel.processIntents(intents) }
-    }
-
     override fun setupIntents() {
         var searchJob = Job()
         var skippedFirst = false
@@ -63,9 +76,11 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
                 if ((p0.length > 2 || p0.isBlank()) && skippedFirst) {
                     searchJob.cancel()
 
-                    searchJob = launch(UI, parent = job) {
+                    searchJob = launch {
                         delay(500)
-                        intents.send(CountrySearchIntent.SearchIntent(p0))
+                        viewModel.run {
+                            processIntents().send(CountrySearchIntent.SearchIntent(p0))
+                        }
                     }
                 }
                 skippedFirst = true
@@ -81,6 +96,10 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
     override fun render(state: CountrySearchViewState) {
         binding.model = state
 
+        if (state.message != null) {
+            showMessage(state.message)
+        }
+
         if (state.error != null) {
             showErrorMessage(state.error)
         }
@@ -88,7 +107,17 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
 
     private fun setupListView() {
         binding.rvCountries.layoutManager = LinearLayoutManager(activity)
+        (binding.rvCountries.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         binding.rvCountries.adapter = adapter
+    }
+
+    private fun showMessage(messageType: MessageType) {
+        showMessage(getString(R.string.toast_favorite_message,
+                if (messageType is MessageType.AddToFavorite) {
+                    getString(R.string.toast_favorite_message_marked)
+                } else {
+                    getString(R.string.toast_favorite_message_unmarked)
+                }))
     }
 
     private fun showErrorMessage(exception: Throwable) {

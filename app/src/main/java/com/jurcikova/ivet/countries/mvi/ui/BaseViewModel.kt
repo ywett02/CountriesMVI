@@ -2,12 +2,14 @@ package com.jurcikova.ivet.countries.mvi.ui
 
 import androidx.lifecycle.ViewModel
 import com.jurcikova.ivet.countries.mvi.mvibase.*
+import com.jurcikova.ivet.countries.mvi.ui.countryList.all.CountryListAction
 import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.Dispatchers
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlin.coroutines.experimental.CoroutineContext
 
-abstract class BaseViewModel<I : MviIntent, A : MviAction, R : MviResult, S : MviViewState> : ViewModel(), MviViewModel<I, S>, CoroutineScope {
+abstract class BaseViewModel<I : MviIntent, A : MviAction, R : MviResult, S : MviViewState> : ViewModel(), MviViewModel<I, A, S>, CoroutineScope {
 
     val job = Job()
 

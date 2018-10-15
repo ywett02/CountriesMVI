@@ -1,5 +1,8 @@
 package com.jurcikova.ivet.countries.mvi.common
 
-interface OnItemClickListener<E> {
-    fun onItemClick(item: E)
+import com.jurcikova.ivet.countries.mvi.business.entity.Country
+
+interface OnCountryClickListener {
+    fun onCountryClick(country: Country)
+    fun onFavoriteClick(country: Country)
 }

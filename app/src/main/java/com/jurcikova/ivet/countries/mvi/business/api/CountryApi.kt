@@ -9,7 +9,4 @@ interface CountryApi {
 
     @GET("all")
     fun getAllCountries(): Deferred<List<Country>>
-
-    @GET("name/{name}")
-    fun getCountriesByName(@Path("name") name: String?): Deferred<List<Country>>
 }

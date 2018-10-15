@@ -6,10 +6,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
-import com.jurcikova.ivet.countries.mvi.common.OnItemClickListener
+import com.jurcikova.ivet.countries.mvi.common.OnCountryClickListener
 import com.jurcikova.ivet.mvi.databinding.ItemCountryBinding
 
-class CountryAdapter(val onItemClickListener: OnItemClickListener<Country>) : ListAdapter<Country, CountryViewHolder>(CountryDiffCallback()) {
+class CountryAdapter(val onCountryClickListener: OnCountryClickListener) : ListAdapter<Country, CountryViewHolder>(CountryDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder =
             LayoutInflater.from(parent.context).let { inflater ->
@@ -20,8 +20,11 @@ class CountryAdapter(val onItemClickListener: OnItemClickListener<Country>) : Li
 
     override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
         getItem(position).let { country ->
-            holder.itemBinding.root.setOnClickListener {
-                onItemClickListener.onItemClick(country)
+            holder.itemBinding.llContent.setOnClickListener {
+                onCountryClickListener.onCountryClick(country)
+            }
+            holder.itemBinding.ivFavorite.setOnClickListener {
+                onCountryClickListener.onFavoriteClick(country)
             }
             holder.bind(country)
         }

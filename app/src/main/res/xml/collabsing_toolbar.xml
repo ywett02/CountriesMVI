@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        motion:constraintSetEnd="@+id/end"
+        motion:constraintSetStart="@+id/start"
+        motion:duration="1000">
+
+        <OnSwipe
+            motion:dragDirection="dragUp"
+            motion:touchAnchorId="@+id/rv_properties"
+            motion:touchAnchorSide="top" />
+
+    </Transition>
+
+    <ConstraintSet android:id="@+id/start">
+
+        <Constraint
+            android:id="@+id/iv_flag"
+            android:layout_width="0dp"
+            android:layout_height="250dp"
+            android:alpha="1.0"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toTopOf="parent" />
+
+        <Constraint
+            android:id="@+id/fab_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:layout_marginEnd="16dp"
+            android:alpha="1.0"
+            motion:layout_constraintEnd_toEndOf="@id/iv_flag"
+            motion:layout_constraintTop_toTopOf="@id/tv_title" />
+
+        <Constraint
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            android:scaleX="1.0"
+            android:scaleY="1.0"
+            motion:layout_constraintBottom_toBottomOf="@id/iv_flag"
+            motion:layout_constraintStart_toStartOf="parent" />
+
+        <Constraint
+            android:id="@+id/iv_background"
+            android:layout_width="0dp"
+            android:layout_height="250dp"
+            android:alpha="0.0"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toTopOf="parent" />
+
+    </ConstraintSet>
+
+    <ConstraintSet android:id="@+id/end">
+
+        <Constraint
+            android:id="@+id/iv_flag"
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            android:alpha="0.2"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toTopOf="parent" />
+
+        <Constraint
+            android:id="@+id/fab_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            motion:layout_constraintBottom_toBottomOf="@id/iv_flag"
+            motion:layout_constraintEnd_toEndOf="@id/iv_flag" />
+
+        <Constraint
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="0dp"
+            android:scaleX="0.625"
+            android:scaleY="0.625"
+            motion:layout_constraintBottom_toBottomOf="@id/iv_flag"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toTopOf="@id/iv_flag" />
+
+        <Constraint
+            android:id="@+id/iv_background"
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            android:alpha="0.8"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toTopOf="parent" />
+
+    </ConstraintSet>
+
+</MotionScene>

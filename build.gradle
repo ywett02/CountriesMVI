@@ -8,6 +8,7 @@ buildscript {
     ext.glide_version = '4.8.0'
     ext.moshi_version = '1.6.0'
     ext.koin_version = '1.0.1'
+    ext.room_version = '2.1.0-alpha01'
 
     repositories {
         google()

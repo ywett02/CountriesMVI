@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -9,37 +11,59 @@
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1">
 
-        <ImageView
-            android:id="@+id/im_flag"
-            android:layout_width="92dp"
-            android:layout_height="80dp"
-            android:layout_marginBottom="8dp"
-            android:contentDescription="@string/cd_flag"
-            android:scaleType="centerInside"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:svg="@{country.flag}"
-            tools:srcCompat="@tools:sample/avatars" />
+        <LinearLayout
+            android:id="@+id/ll_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/tv_name"
+            <ImageView
+                android:id="@+id/im_flag"
+                android:layout_width="92dp"
+                android:layout_height="80dp"
+                android:contentDescription="@string/cd_flag"
+                android:scaleType="centerInside"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:svg="@{country.flag}"
+                tools:srcCompat="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:padding="@dimen/space_16"
+                android:text="@{country.name}"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/im_flag"
+                app:layout_constraintStart_toEndOf="@id/im_flag"
+                app:layout_constraintTop_toTopOf="@id/im_flag"
+                tools:text="@tools:sample/first_names" />
+
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/iv_favorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="@dimen/space_16"
-            android:text="@{country.name}"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/im_flag"
-            app:layout_constraintStart_toEndOf="@id/im_flag"
-            app:layout_constraintTop_toTopOf="@id/im_flag"
-            tools:text="@tools:sample/first_names" />
+            android:layout_gravity="center"
+            android:layout_weight="0"
+            android:button="@drawable/checkbox_selector"
+            android:buttonTint="@color/colorAccent"
+            android:checked="@{country.isFavorite ? true : false}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/ic_favorite" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
 </layout>

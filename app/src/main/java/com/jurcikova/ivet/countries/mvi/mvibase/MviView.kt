@@ -1,7 +1,5 @@
 package com.jurcikova.ivet.countries.mvi.mvibase
 
-import kotlinx.coroutines.experimental.channels.Channel
-
 /**
  * Object representing a UI that will
  * a) emit its intents to a view model,
@@ -11,8 +9,6 @@ import kotlinx.coroutines.experimental.channels.Channel
  * @param S Top class of the [MviViewState] the [MviView] will be subscribing to.
  */
 interface MviView<I : MviIntent, in S : MviViewState> {
-
-    val intents: Channel<I>
 
     /**
      * Entry point for the [MviView] to render itself based on a [MviViewState].

@@ -1,7 +1,10 @@
 package com.jurcikova.ivet.countries.mvi.app
 
+import android.app.Application
+import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory
 import com.jurcikova.ivet.countries.mvi.business.api.CountryApi
+import com.jurcikova.ivet.countries.mvi.business.db.CountryDatabase
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountrySearchInteractor
@@ -15,10 +18,21 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.ext.koin.viewModel
 import org.koin.dsl.module.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+
+val databaseModule = module {
+    single {
+        createDb(androidApplication())
+    }
+
+    single {
+        getCountryDao(get())
+    }
+}
 
 val apiModule = module {
     single {
@@ -39,7 +53,7 @@ val apiModule = module {
         createCountryService(get())
     }
     single<CountryRepository> {
-        CountryRepositoryImpl(get())
+        CountryRepositoryImpl(get(), get())
     }
     single {
         CountryListInteractor(get())
@@ -63,6 +77,13 @@ val viewModelModule = module {
         CountryDetailViewModel(get())
     }
 }
+
+
+private fun createDb(context: Application) =
+        Room.databaseBuilder(context, CountryDatabase::class.java, Config.databaseName).build()
+
+private fun getCountryDao(database: CountryDatabase) =
+        database.countryDao()
 
 private fun createRetrofit(moshi: Moshi, okHttpClient: OkHttpClient) =
         Retrofit.Builder()

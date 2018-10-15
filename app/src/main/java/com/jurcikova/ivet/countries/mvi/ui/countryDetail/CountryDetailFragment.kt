@@ -2,6 +2,7 @@ package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 
 import android.os.Bundle
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.common.setOnClick
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
@@ -19,6 +20,7 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
     }
 
     private val viewModel: CountryDetailViewModel by viewModel()
+    private val adapter = CountryPropertyAdapter()
 
     override val binding: FragmentCountryDetailBinding by BindFragment(R.layout.fragment_country_detail)
 
@@ -37,38 +39,56 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
         setupIntents()
     }
 
-    override fun startStream() {
-        launch { viewModel.processIntents(intents) }
-    }
-
     override fun setupIntents() {
         binding.fabAdd.setOnClick(this) {
-            viewModel.state.value.let {
-                if (it.isFavorite) intents.send(CountryDetailIntent.RemoveFromFavoriteIntent(it.country!!.name))
-                else intents.send(CountryDetailIntent.AddToFavoriteIntent(it.country!!.name))
+            viewModel.state.value.country?.let {
+                if (it.isFavorite) {
+                    launch {
+                        viewModel.run {
+                            processIntents().send(CountryDetailIntent.RemoveFromFavoriteIntent(it.name))
+                        }
+                    }
+                } else {
+                    launch {
+                        viewModel.run {
+                            processIntents().send(CountryDetailIntent.AddToFavoriteIntent(it.name))
+                        }
+                    }
+                }
             }
         }
     }
 
     override fun initViews() {
+        setupListView()
     }
 
     override fun render(state: CountryDetailViewState) {
         binding.countryDetailViewState = state
 
-        if (state.initial) {
+        if (state.initial && !state.isLoading) {
             launch {
-                intents.send(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)))
+                viewModel.run {
+                    processIntents().send(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)))
+                }
             }
         }
 
         if (state.showMessage) {
-            showMessage(state.isFavorite)
+            state.country?.let {
+                showMessage(it.isFavorite)
+            }
+
         }
 
         state.error?.let {
             showErrorMessage(it)
         }
+    }
+
+    private fun setupListView() {
+        binding.rvProperties.layoutManager = LinearLayoutManager(activity)
+        binding.rvProperties.adapter = adapter
     }
 
     private fun showMessage(isFavorite: Boolean) {
