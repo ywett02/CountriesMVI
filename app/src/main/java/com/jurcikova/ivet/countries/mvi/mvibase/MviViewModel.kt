@@ -12,7 +12,8 @@ import io.reactivex.Observable
  * @param S Top class of the [MviViewState] the [MviViewModel] will be emitting.
  */
 interface MviViewModel<I : MviIntent, S : MviViewState> {
-  fun processIntents(intents: Observable<I>)
 
-  fun states(): LiveData<S>
+	val statesLiveData: LiveData<S>
+
+	fun processIntents(intents: Observable<I>)
 }

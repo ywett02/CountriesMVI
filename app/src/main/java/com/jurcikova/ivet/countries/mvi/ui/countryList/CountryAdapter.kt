@@ -14,40 +14,40 @@ import io.reactivex.subjects.PublishSubject
 
 class CountryAdapter : ListAdapter<Country, CountryViewHolder>(CountryDiffCallback()) {
 
-    private val onClickSubject = PublishSubject.create<Country>()
-    private val onFavoriteButtonClickSubject = PublishSubject.create<Country>()
+	private val onClickSubject = PublishSubject.create<Country>()
+	private val onFavoriteButtonClickSubject = PublishSubject.create<Country>()
 
-    val countryClickObservable: LiveData<Country>
-        get() = LiveDataReactiveStreams.fromPublisher(onClickSubject.toFlowable(BackpressureStrategy.BUFFER))
+	val countryClickObservable: LiveData<Country>
+		get() = LiveDataReactiveStreams.fromPublisher(onClickSubject.toFlowable(BackpressureStrategy.BUFFER))
 
-    val favoriteButtonClickObservable: LiveData<Country>
-        get() = LiveDataReactiveStreams.fromPublisher(onFavoriteButtonClickSubject.toFlowable(BackpressureStrategy.BUFFER))
+	val favoriteButtonClickObservable: LiveData<Country>
+		get() = LiveDataReactiveStreams.fromPublisher(onFavoriteButtonClickSubject.toFlowable(BackpressureStrategy.BUFFER))
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder =
-            CountryViewHolder(ItemCountryBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder =
+		CountryViewHolder(ItemCountryBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
-    override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
-        getItem(position).let { country ->
-            holder.itemBinding.llContent.setOnClickListener {
-                onClickSubject.onNext(country)
-            }
-            holder.itemBinding.ivFavorite.setOnClickListener {
-                onFavoriteButtonClickSubject.onNext(country)
-            }
-            holder.bind(country)
-        }
-    }
+	override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
+		getItem(position).let { country ->
+			holder.itemBinding.llContent.setOnClickListener {
+				onClickSubject.onNext(country)
+			}
+			holder.itemBinding.ivFavorite.setOnClickListener {
+				onFavoriteButtonClickSubject.onNext(country)
+			}
+			holder.bind(country)
+		}
+	}
 }
 
 class CountryViewHolder(val itemBinding: ItemCountryBinding) : RecyclerView.ViewHolder(itemBinding.root) {
-    fun bind(item: Country?) {
-        itemBinding.country = item
-        itemBinding.executePendingBindings()
-    }
+	fun bind(item: Country?) {
+		itemBinding.country = item
+		itemBinding.executePendingBindings()
+	}
 }
 
 class CountryDiffCallback : DiffUtil.ItemCallback<Country>() {
-    override fun areItemsTheSame(oldItem: Country, newItem: Country): Boolean = oldItem.name == newItem.name
+	override fun areItemsTheSame(oldItem: Country, newItem: Country): Boolean = oldItem.name == newItem.name
 
-    override fun areContentsTheSame(oldItem: Country, newItem: Country): Boolean = oldItem == newItem
+	override fun areContentsTheSame(oldItem: Country, newItem: Country): Boolean = oldItem == newItem
 }

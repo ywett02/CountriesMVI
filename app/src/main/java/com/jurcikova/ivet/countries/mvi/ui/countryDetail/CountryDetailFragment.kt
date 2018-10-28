@@ -5,99 +5,98 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.view.RxView
 import com.jurcikova.ivet.countries.mvi.business.entity.enums.MessageType
-import com.jurcikova.ivet.countries.mvi.common.BindFragment
 import com.jurcikova.ivet.countries.mvi.ui.base.BaseFragment
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailIntent.AddToFavoriteIntent
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailIntent.InitialIntent
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailIntent.RemoveFavoriteIntent
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
 import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.PublishSubject.create
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>() {
+class CountryDetailFragment
+	: BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>(R.layout.fragment_country_detail) {
 
-    companion object {
-        val countryName = "countryName"
-    }
+	companion object {
+		const val countryName = "countryName"
+	}
 
-    private val countryDetailViewModel: CountryDetailViewModel by viewModel()
+	private val countryDetailViewModel: CountryDetailViewModel by viewModel()
 
-    private val adapter by inject<CountryPropertyAdapter>()
+	private val adapter by inject<CountryPropertyAdapter>()
 
-    private val initialIntentPublisher = PublishSubject.create<CountryDetailIntent.InitialIntent>()
+	private val initialIntentPublisher = create<InitialIntent>()
 
-    private val favoriteButtonClickedIntent by lazy {
-        RxView.clicks(binding.fabAdd).flatMap {
-            countryDetailViewModel.statesStream().map { state ->
-                if (state.country?.isFavorite != true) {
-                    CountryDetailIntent.AddToFavoriteIntent(state.country!!.name)
-                } else {
-                    CountryDetailIntent.RemoveFavoriteIntent(state.country.name)
-                }
-            }.take(1)
-        }
-    }
+	private val favoriteButtonClickedIntent by lazy {
+		RxView.clicks(binding.fabAdd).flatMap {
+			binding.countryDetailViewState.country?.let { country ->
+				Observable.just(
+					if (country.isFavorite) {
+						RemoveFavoriteIntent(country.name)
+					} else {
+						AddToFavoriteIntent(country.name)
+					}
+				)
+			}
+		}.take(1)
+	}
 
-    override val binding: FragmentCountryDetailBinding by BindFragment(R.layout.fragment_country_detail)
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+		countryDetailViewModel.statesLiveData.observe(this, Observer { state ->
+			logD("state: $state")
 
+			render(state!!)
+		})
+	}
 
-        countryDetailViewModel.states().observe(this, Observer { state ->
-            logD("state: $state")
+	override fun initViews() {
+		setupListView()
+	}
 
-            render(state!!)
-        })
-    }
+	override fun startStream() =
+		countryDetailViewModel.processIntents(intents())
 
-    override fun initViews() {
-        setupListView()
-    }
+	override fun intents(): Observable<CountryDetailIntent> = Observable.merge(
+		initialIntent(),
+		favoriteButtonClickedIntent
+	)
 
-    override fun startStream() {
-        countryDetailViewModel.processIntents(intents())
-    }
+	override fun render(state: CountryDetailViewState) {
+		binding.countryDetailViewState = state
 
-    override fun intents(): Observable<CountryDetailIntent> = Observable.merge(
-            initialIntent(),
-            favoriteButtonClickedIntent
-    )
+		if (state.initial) {
+			initialIntentPublisher.onNext(InitialIntent(arguments?.getString(countryName)))
+		}
 
-    override fun render(state: CountryDetailViewState) {
-        binding.countryDetailViewState = state
+		if (state.message != null) {
+			showFavoriteStateChangeMessage(state.message)
+		}
 
-        if (state.initial) {
-            initialIntentPublisher.onNext(CountryDetailIntent.InitialIntent(arguments?.getString(countryName)))
-        }
+		state.error?.let {
+			showErrorMessage(it)
+		}
+	}
 
-        if (state.message != null) {
-            showMessage(state.message)
-        }
+	private fun setupListView() {
+		binding.rvProperties.layoutManager = LinearLayoutManager(activity)
+		binding.rvProperties.adapter = adapter
+	}
 
-        state.error?.let {
-            showErrorMessage(it)
-        }
-    }
+	private fun showFavoriteStateChangeMessage(messageType: MessageType) =
+		toast(getString(R.string.toast_favorite_message,
+			if (messageType is MessageType.AddToFavorite) {
+				getString(R.string.toast_favorite_message_marked)
+			} else {
+				getString(R.string.toast_favorite_message_unmarked)
+			}))
 
-    private fun setupListView() {
-        binding.rvProperties.layoutManager = LinearLayoutManager(activity)
-        binding.rvProperties.adapter = adapter
-    }
+	private fun showErrorMessage(exception: Throwable) =
+		toast(exception.localizedMessage)
 
-    private fun showMessage(messageType: MessageType) {
-        showMessage(getString(R.string.toast_favorite_message,
-                if (messageType is MessageType.AddToFavorite) {
-                    getString(R.string.toast_favorite_message_marked)
-                } else {
-                    getString(R.string.toast_favorite_message_unmarked)
-                }))
-    }
-
-    private fun showErrorMessage(exception: Throwable) {
-        showMessage(exception.localizedMessage)
-    }
-
-    private fun initialIntent(): Observable<CountryDetailIntent.InitialIntent> = initialIntentPublisher
+	private fun initialIntent(): Observable<InitialIntent> = initialIntentPublisher
 }
