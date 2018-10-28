@@ -4,10 +4,10 @@ import com.jurcikova.ivet.countries.mvi.business.entity.Country
 import com.jurcikova.ivet.countries.mvi.mvibase.MviResult
 
 sealed class CountrySearchResult : MviResult {
-    sealed class LoadCountriesByNameResult : CountrySearchResult() {
-        object NotStarted : LoadCountriesByNameResult()
-        data class Success(val countries: List<Country>) : LoadCountriesByNameResult()
-        data class Failure(val error: Throwable) : LoadCountriesByNameResult()
-        data class InProgress(val searchQuery: String) : LoadCountriesByNameResult()
-    }
+	sealed class LoadCountriesByNameResult : CountrySearchResult() {
+		object NotStarted : LoadCountriesByNameResult()
+		data class Success(val countries: List<Country>) : LoadCountriesByNameResult()
+		data class Failure(val error: Throwable) : LoadCountriesByNameResult()
+		data class InProgress(val searchQuery: String) : LoadCountriesByNameResult()
+	}
 }

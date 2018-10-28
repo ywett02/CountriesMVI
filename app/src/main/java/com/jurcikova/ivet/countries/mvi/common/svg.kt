@@ -25,48 +25,48 @@ import java.io.InputStream
 @GlideModule
 class SvgModule : AppGlideModule() {
 
-    override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
-        registry.register(SVG::class.java, PictureDrawable::class.java, SvgDrawableTranscoder()).append(InputStream::class.java, SVG::class.java, SvgDecoder())
-    }
+	override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
+		registry.register(SVG::class.java, PictureDrawable::class.java, SvgDrawableTranscoder()).append(InputStream::class.java, SVG::class.java, SvgDecoder())
+	}
 
-    // Disable manifest parsing to avoid adding similar modules twice.
-    override fun isManifestParsingEnabled(): Boolean = false
+	// Disable manifest parsing to avoid adding similar modules twice.
+	override fun isManifestParsingEnabled(): Boolean = false
 }
 
 class SvgSoftwareLayerSetter : RequestListener<PictureDrawable> {
 
-    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<PictureDrawable>?, isFirstResource: Boolean): Boolean {
-        (target as ImageViewTarget).view.run {
-            setLayerType(ImageView.LAYER_TYPE_NONE, null)
-        }
+	override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<PictureDrawable>?, isFirstResource: Boolean): Boolean {
+		(target as ImageViewTarget).view.run {
+			setLayerType(ImageView.LAYER_TYPE_NONE, null)
+		}
 
-        return false
-    }
+		return false
+	}
 
-    override fun onResourceReady(resource: PictureDrawable?, model: Any?, target: Target<PictureDrawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-        (target as ImageViewTarget).view.run {
-            setLayerType(ImageView.LAYER_TYPE_NONE, null)
-        }
+	override fun onResourceReady(resource: PictureDrawable?, model: Any?, target: Target<PictureDrawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+		(target as ImageViewTarget).view.run {
+			setLayerType(ImageView.LAYER_TYPE_NONE, null)
+		}
 
-        return false
-    }
+		return false
+	}
 }
 
 class SvgDrawableTranscoder : ResourceTranscoder<SVG, PictureDrawable> {
 
-    override fun transcode(toTranscode: Resource<SVG>, options: Options): Resource<PictureDrawable>? =
-            SimpleResource(PictureDrawable(toTranscode.get().renderToPicture()))
+	override fun transcode(toTranscode: Resource<SVG>, options: Options): Resource<PictureDrawable>? =
+		SimpleResource(PictureDrawable(toTranscode.get().renderToPicture()))
 }
 
 class SvgDecoder : ResourceDecoder<InputStream, SVG> {
 
-    override fun handles(source: InputStream, options: Options): Boolean = true
+	override fun handles(source: InputStream, options: Options): Boolean = true
 
-    override fun decode(source: InputStream, width: Int, height: Int, options: Options): Resource<SVG>? =
-            try {
-                SimpleResource(SVG.getFromInputStream(source))
-            } catch (ex: SVGParseException) {
-                throw IOException("Cannot load SVG from stream, ex")
-            }
+	override fun decode(source: InputStream, width: Int, height: Int, options: Options): Resource<SVG>? =
+		try {
+			SimpleResource(SVG.getFromInputStream(source))
+		} catch (ex: SVGParseException) {
+			throw IOException("Cannot load SVG from stream, ex")
+		}
 }
 

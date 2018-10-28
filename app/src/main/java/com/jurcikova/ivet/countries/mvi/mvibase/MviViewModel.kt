@@ -13,7 +13,7 @@ import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
  */
 interface MviViewModel<I : MviIntent, S : MviViewState> {
 
-  val state: ConflatedBroadcastChannel<S>
+	val state: ConflatedBroadcastChannel<S>
 
-  suspend fun processIntents(channel: Channel<I>)
+	suspend fun processIntents(channel: Channel<I>)
 }

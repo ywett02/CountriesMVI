@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.annotation.LayoutRes
+import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.jurcikova.ivet.countries.mvi.common.AndroidJob
@@ -12,47 +15,51 @@ import com.jurcikova.ivet.countries.mvi.mvibase.MviView
 import com.jurcikova.ivet.countries.mvi.mvibase.MviViewState
 import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlin.coroutines.experimental.CoroutineContext
 
+abstract class BaseFragment<VB : ViewDataBinding, I : MviIntent, S : MviViewState>(
+	@LayoutRes val layoutRes: Int
+) : Fragment(), CoroutineScope, MviView<I, S> {
 
-abstract class BaseFragment<VB : ViewDataBinding, I : MviIntent, S : MviViewState> : Fragment(), CoroutineScope, MviView<I, S> {
+	protected val job = AndroidJob(lifecycle)
 
-    protected val job = AndroidJob(lifecycle)
+	lateinit var binding: VB
 
-    //delegate the binding initialization to BindFragment delegate
-    protected abstract val binding: VB
+	override val intents = Channel<I>()
 
-    protected abstract fun initViews()
+	override val coroutineContext: CoroutineContext
+		get() = Dispatchers.Main + job
 
-    protected abstract fun setupIntents()
+	protected abstract fun initViews()
 
-    override val intents = Channel<I>()
+	protected abstract fun setupIntents()
 
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+	/**
+	 *  Start the stream by passing [MviIntent] to [MviViewModel]
+	 */
+	protected abstract fun startStream(): Job
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        initViews()
-    }
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		binding = DataBindingUtil.inflate<VB>(layoutInflater, layoutRes, view?.rootView as ViewGroup?, false)
+		binding.setLifecycleOwner(this)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? = binding.root
+		initViews()
+	}
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        startStream()
-        setupIntents()
-    }
+	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+		savedInstanceState: Bundle?): View? = binding.root
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        job.destroy()
-    }
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+		startStream()
+		setupIntents()
+	}
 
-    /**
-     *  Start the stream by passing [MviIntent] to [MviViewModel]
-     */
-    protected abstract fun startStream()
+	protected fun toast(message: String) =
+		activity?.let {
+			Toast.makeText(it, message, Toast.LENGTH_SHORT).show()
+		}
 }

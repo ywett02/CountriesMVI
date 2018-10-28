@@ -21,59 +21,59 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 val apiModule = module {
-    single {
-        Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-    }
-    single {
-        OkHttpClient.Builder()
-                .addInterceptor(HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                })
-                .build()
-    }
-    single {
-        createRetrofit(get(), get())
-    }
+	single {
+		Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+	}
+	single {
+		OkHttpClient.Builder()
+			.addInterceptor(HttpLoggingInterceptor().apply {
+				level = HttpLoggingInterceptor.Level.BODY
+			})
+			.build()
+	}
+	single {
+		createRetrofit(get(), get())
+	}
 
-    single<CountryApi> {
-        createCountryService(get())
-    }
-    single<CountryRepository> {
-        CountryRepositoryImpl(get())
-    }
-    single {
-        CountryListInteractor(get())
-    }
-    single {
-        CountrySearchInteractor(get())
-    }
-    single {
-        CountryDetailInteractor(get())
-    }
+	single<CountryApi> {
+		createCountryService(get())
+	}
+	single<CountryRepository> {
+		CountryRepositoryImpl(get())
+	}
+	single {
+		CountryListInteractor(get())
+	}
+	single {
+		CountrySearchInteractor(get())
+	}
+	single {
+		CountryDetailInteractor(get())
+	}
 }
 
 val viewModelModule = module {
-    viewModel {
-        CountrySearchViewModel(get())
-    }
-    viewModel {
-        CountryListViewModel(get())
-    }
-    viewModel {
-        CountryDetailViewModel(get())
-    }
+	viewModel {
+		CountrySearchViewModel(get())
+	}
+	viewModel {
+		CountryListViewModel(get())
+	}
+	viewModel {
+		CountryDetailViewModel(get())
+	}
 }
 
 private fun createRetrofit(moshi: Moshi, okHttpClient: OkHttpClient) =
-        Retrofit.Builder()
-                .baseUrl(Config.baseUrl)
-                .client(okHttpClient)
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
-                .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .build()
+	Retrofit.Builder()
+		.baseUrl(Config.baseUrl)
+		.client(okHttpClient)
+		.addConverterFactory(MoshiConverterFactory.create(moshi))
+		.addCallAdapterFactory(CoroutineCallAdapterFactory())
+		.build()
 
 private fun createCountryService(retrofit: Retrofit) =
-        retrofit.create(CountryApi::class.java)
+	retrofit.create(CountryApi::class.java)
 
 
 

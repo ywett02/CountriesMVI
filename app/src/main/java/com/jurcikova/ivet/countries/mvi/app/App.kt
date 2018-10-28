@@ -5,10 +5,10 @@ import com.strv.ktools.setLogTag
 import org.koin.android.ext.android.startKoin
 
 class App : Application() {
-    override fun onCreate() {
-        super.onCreate()
+	override fun onCreate() {
+		super.onCreate()
 
-        setLogTag("CountriesMVI")
-        startKoin(this, listOf(apiModule, viewModelModule))
-    }
+		setLogTag("CountriesMVI")
+		startKoin(this, listOf(apiModule, viewModelModule))
+	}
 }

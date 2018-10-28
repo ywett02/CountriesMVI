@@ -11,22 +11,20 @@ import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.actor
 
 class AndroidJob(lifecycle: Lifecycle) : Job by Job(), LifecycleObserver {
-    init {
-        lifecycle.addObserver(this)
-    }
+	init {
+		lifecycle.addObserver(this)
+	}
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    fun destroy() = cancel()
+	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+	fun destroy() = cancel()
 }
 
 fun View.setOnClick(scope: CoroutineScope, action: suspend () -> Unit) {
-    // launch one actor as a parent of the context job
-    val eventActor = scope.actor<Unit>(
-            start = CoroutineStart.UNDISPATCHED,
-            capacity = Channel.CONFLATED) {
-        for (event in channel) action()
-    }
-    // install a listener to activate this actor
-    setOnClickListener { eventActor.offer(Unit) }
+	// launch one actor as a parent of the context job
+	val eventActor = scope.actor<Unit> {
+		for (event in channel) action()
+	}
+	// install a listener to activate this actor
+	setOnClickListener { eventActor.offer(Unit) }
 }
 

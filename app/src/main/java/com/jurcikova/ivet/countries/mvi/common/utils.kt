@@ -5,10 +5,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 
 fun Fragment.navigate(actionId: Int, bundle: Bundle) {
-    findNavController().navigate(actionId, bundle)
+	findNavController().navigate(actionId, bundle)
 }
 
 fun bundleOf(bundle: Pair<String, String>) =
-        Bundle().apply {
-            putString(bundle.first, bundle.second)
-        }
+	Bundle().apply {
+		putString(bundle.first, bundle.second)
+	}

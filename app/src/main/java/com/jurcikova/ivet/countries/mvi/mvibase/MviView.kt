@@ -12,11 +12,11 @@ import kotlinx.coroutines.experimental.channels.Channel
  */
 interface MviView<I : MviIntent, in S : MviViewState> {
 
-    val intents: Channel<I>
+	val intents: Channel<I>
 
-    /**
-     * Entry point for the [MviView] to render itself based on a [MviViewState].
-     * Reflects [MviViewState] to the screen
-     */
-    fun render(state: S)
+	/**
+	 * Entry point for the [MviView] to render itself based on a [MviViewState].
+	 * Reflects [MviViewState] to the screen
+	 */
+	fun render(state: S)
 }

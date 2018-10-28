@@ -5,5 +5,5 @@ import kotlinx.coroutines.experimental.channels.ReceiveChannel
 
 interface MviInteractor<A : MviAction, R : MviResult> {
 
-    fun CoroutineScope.processAction(action: A): ReceiveChannel<R>
+	fun CoroutineScope.processAction(action: A): ReceiveChannel<R>
 }
