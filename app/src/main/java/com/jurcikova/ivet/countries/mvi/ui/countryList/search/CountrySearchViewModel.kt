@@ -6,6 +6,7 @@ import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchActio
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchIntent.SearchIntent
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult.LoadCountriesByNameResult
 import com.strv.ktools.logD
+import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.experimental.channels.consumeEach
@@ -44,7 +45,7 @@ class CountrySearchViewModel(private val countrySearchInteractor: CountrySearchI
 			}
 		}
 
-	override suspend fun processIntents(channel: Channel<CountrySearchIntent>) = state.run {
+	override suspend fun CoroutineScope.processIntents(channel: Channel<CountrySearchIntent>) = state.run {
 		channel
 			.map { intent ->
 				logD("intent: $intent")

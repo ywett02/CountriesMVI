@@ -12,6 +12,7 @@ import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailResult.Add
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailResult.LoadCountryDetailResult
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailResult.RemoveFromFavoriteResult
 import com.strv.ktools.logD
+import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.experimental.channels.consumeEach
@@ -46,7 +47,7 @@ class CountryDetailViewModel(val countryDetailInteractor: CountryDetailInteracto
 			}
 		}
 
-	override suspend fun processIntents(channel: Channel<CountryDetailIntent>) =
+	override suspend fun CoroutineScope.processIntents(channel: Channel<CountryDetailIntent>) =
 		state.run {
 			channel
 				.map { intent ->

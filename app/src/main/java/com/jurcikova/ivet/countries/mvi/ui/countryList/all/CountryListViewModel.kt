@@ -14,7 +14,7 @@ import kotlinx.coroutines.experimental.channels.consumeEach
 import kotlinx.coroutines.experimental.channels.flatMap
 import kotlinx.coroutines.experimental.channels.map
 
-class CountryListViewModel(val countryListInteractor: CountryListInteractor) : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>(), CoroutineScope {
+class CountryListViewModel(val countryListInteractor: CountryListInteractor) : BaseViewModel<CountryListIntent, CountryListAction, CountryListResult, CountryListViewState>() {
 
 	override val state = ConflatedBroadcastChannel(CountryListViewState.idle())
 
@@ -40,7 +40,7 @@ class CountryListViewModel(val countryListInteractor: CountryListInteractor) : B
 			}
 		}
 
-	override suspend fun processIntents(channel: Channel<CountryListIntent>) =
+	override suspend fun CoroutineScope.processIntents(channel: Channel<CountryListIntent>) =
 		state.run {
 			channel
 				.map { intent ->

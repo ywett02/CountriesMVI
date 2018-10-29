@@ -35,7 +35,7 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
 	}
 
 	override fun startStream() =
-		launch { viewModel.processIntents(intents) }
+		launch { viewModel.run { processIntents(intents) } }
 
 	override fun setupIntents() {
 		binding.fabAdd.setOnClick(this) {

@@ -49,7 +49,7 @@ class CountryListFragment : BaseFragment<FragmentCountryListBinding, CountryList
 	}
 
 	override fun startStream() =
-		launch { viewModel.processIntents(intents) }
+		launch { viewModel.run { processIntents(intents) } }
 
 	override fun initViews() {
 		setupListView()
