@@ -32,7 +32,7 @@ class CountryDetailFragment
 
 	private val favoriteButtonClickedIntent by lazy {
 		RxView.clicks(binding.fabAdd).flatMap {
-			binding.countryDetailViewState.country?.let { country ->
+			binding.countryDetailViewState?.country?.let { country ->
 				Observable.just(
 					if (country.isFavorite) {
 						RemoveFavoriteIntent(country.name)

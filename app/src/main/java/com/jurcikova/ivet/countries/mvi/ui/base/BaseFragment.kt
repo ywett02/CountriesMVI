@@ -9,9 +9,9 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import com.jurcikova.ivet.countries.mvi.mvibase.MviIntent
 import com.jurcikova.ivet.countries.mvi.mvibase.MviView
 import com.jurcikova.ivet.countries.mvi.mvibase.MviViewState
-import com.jurcikova.ivet.countries.mvi.mvibase.MviIntent
 
 abstract class BaseFragment<VB : ViewDataBinding, I : MviIntent, S : MviViewState>(
 	@LayoutRes val layoutRes: Int
