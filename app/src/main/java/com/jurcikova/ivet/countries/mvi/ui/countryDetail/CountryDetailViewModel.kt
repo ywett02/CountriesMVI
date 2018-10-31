@@ -19,7 +19,7 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 
-class CountryDetailViewModel(countryDetailInteractor: CountryDetailInteractor) : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
+class CountryDetailViewModel(private val countryDetailInteractor: CountryDetailInteractor) : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
 
 	override val reducer = BiFunction { previousState: CountryDetailViewState, result: CountryDetailResult ->
 		when (result) {
@@ -29,13 +29,13 @@ class CountryDetailViewModel(countryDetailInteractor: CountryDetailInteractor) :
 				is LoadCountryDetailResult.InProgress -> previousState.copy(isLoading = true)
 			}
 			is AddToFavoriteResult -> when (result) {
-				is AddToFavoriteResult.Success -> previousState.copy(isLoading = false, message = MessageType.AddToFavorite, error = null)
+				is AddToFavoriteResult.Success -> previousState.copy(isLoading = false, country = previousState.country.also { it?.isFavorite = true }, message = MessageType.AddToFavorite, error = null)
 				is AddToFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
 				is AddToFavoriteResult.InProgress -> previousState.copy(isLoading = true)
 				is AddToFavoriteResult.Reset -> previousState.copy(message = null)
 			}
 			is RemoveFromFavoriteResult -> when (result) {
-				is RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, message = MessageType.RemoveFromFavorite, error = null)
+				is RemoveFromFavoriteResult.Success -> previousState.copy(isLoading = false, country = previousState.country.also { it?.isFavorite = false }, message = MessageType.RemoveFromFavorite, error = null)
 				is RemoveFromFavoriteResult.Failure -> previousState.copy(isLoading = false, error = result.error)
 				is RemoveFromFavoriteResult.InProgress -> previousState.copy(isLoading = true)
 				is RemoveFromFavoriteResult.Reset -> previousState.copy(message = null)

@@ -5,9 +5,14 @@ import com.jurcikova.ivet.countries.mvi.mvibase.MviResult
 
 sealed class CountryListResult : MviResult {
 	sealed class LoadCountriesResult : CountryListResult() {
-		data class Success(val countries: List<Country>, val filterType: FilterType?) : LoadCountriesResult()
+		data class Success(val filterType: FilterType) : LoadCountriesResult()
 		data class Failure(val error: Throwable) : LoadCountriesResult()
 		data class InProgress(val isRefreshing: Boolean) : LoadCountriesResult()
+	}
+
+	sealed class UpdateCountryListResult : CountryListResult() {
+		data class Success(val countries: List<Country>) : UpdateCountryListResult()
+		data class Failure(val error: Throwable) : UpdateCountryListResult()
 	}
 
 	sealed class AddToFavoriteResult : CountryListResult() {

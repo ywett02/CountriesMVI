@@ -4,78 +4,57 @@ import com.jurcikova.ivet.countries.mvi.business.api.CountryApi
 import com.jurcikova.ivet.countries.mvi.business.db.dao.CountryDao
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
 import com.strv.ktools.logD
-import io.reactivex.BackpressureStrategy
+import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Observable
+import io.reactivex.Single
 
 interface CountryRepository {
 
-    fun getCountry(countryName: String?): Flowable<Country>
+	fun loadCountries(): Completable
 
-    fun getAllCountries(): Flowable<List<Country>>
+	fun getCountries(): Flowable<List<Country>>
 
-    fun getCountriesByName(searchQuery: String): Flowable<List<Country>>
+	fun addToFavorite(countryName: String)
 
-    fun addToFavorite(countryName: String)
+	fun removeFromFavorite(countryName: String)
 
-    fun removeFromFavorite(countryName: String)
+	fun getCountry(countryName: String?): Single<Country>
+
+	fun getCountriesByName(searchQuery: String): Single<List<Country>>
 }
 
 class CountryRepositoryImpl(private val countryService: CountryApi, private val countryDao: CountryDao) : CountryRepository {
 
-    override fun addToFavorite(countryName: String) {
-        countryDao.updateIsFavorite(countryName, true)
-    }
+	override fun loadCountries(): Completable =
+		countryService.getAllCountries()
+			.doOnSuccess { countries ->
+				logD("Dispatching ${countries.size} countries from API...")
+				storeCountriesInDb(countries)
+			}.ignoreElement()
 
-    override fun removeFromFavorite(countryName: String) {
-        countryDao.updateIsFavorite(countryName, false)
-    }
+	override fun getCountries(): Flowable<List<Country>> =
+		countryDao.getAll()
+			.doOnNext { logD("Dispatching ${it.size} from DB...") }
 
-    override fun getCountry(countryName: String?): Flowable<Country> =
-            getCountryFromDb(countryName)
+	override fun addToFavorite(countryName: String) {
+		countryDao.updateIsFavorite(countryName, true)
+	}
 
-    override fun getCountriesByName(searchQuery: String): Flowable<List<Country>> =
-            getCountriesByNameFromDb(searchQuery)
+	override fun removeFromFavorite(countryName: String) {
+		countryDao.updateIsFavorite(countryName, false)
+	}
 
-    override fun getAllCountries(): Flowable<List<Country>>  {
-        return Observable.concatArrayEager(
-                getCountriesFromDb(),
-                getCountriesFromApi())
-                .toFlowable(BackpressureStrategy.BUFFER)
-    }
+	override fun getCountry(countryName: String?): Single<Country> =
+		countryDao.getCountry(countryName)
+			.doOnSuccess { logD("Dispatching ${it.name} from DB...") }
 
-    private fun getCountriesFromDb() =
-            countryDao.getAll()
-                    .toObservable()
-                    .doOnNext { logD("Dispatching ${it.size} from DB...") }
+	override fun getCountriesByName(searchQuery: String): Single<List<Country>> =
+		countryDao.getCountriesByName("%$searchQuery%")
+			.doOnSuccess { logD("Dispatching ${it.size} from DB...") }
 
-    private fun getCountryFromDb(name: String?) =
-            countryDao.getCountry(name)
-                    .doOnNext { logD("Dispatching ${it.name} from DB...") }
-
-    private fun getCountriesByNameFromDb(name: String) =
-            countryDao.getCountriesByName("%$name%")
-                    .doOnNext { logD("Dispatching ${it.size} from DB...") }
-
-    private fun getCountriesFromApi() =
-            countryService.getAllCountries()
-                    .toObservable()
-                    .doOnNext { countries ->
-                        logD("Dispatching ${countries.size} countries from API...")
-                        val updatedItems = (countryDao.getAllSync() + countries).groupBy {
-                            it
-                        }.filter {
-                            it.value.size == 1
-                        }.keys.toList()
-
-                        if (updatedItems.isNotEmpty()) {
-                            logD("Saving ${updatedItems.size} countries from API to DB...")
-                            storeCountriesInDb(updatedItems)
-                        }
-                    }
-
-    private fun storeCountriesInDb(countries: List<Country>) {
-        countryDao.insertFetchedCountries(countries = countries)
-    }
+	private fun storeCountriesInDb(countries: List<Country>) {
+		logD("Saving ${countries.size} countries from API to DB...")
+		countryDao.insertFetchedCountries(countries = countries)
+	}
 }
 

@@ -5,7 +5,13 @@ import com.jurcikova.ivet.countries.mvi.business.repository.CountryRepository
 import com.jurcikova.ivet.countries.mvi.common.pairWithDelay
 import com.jurcikova.ivet.countries.mvi.mvibase.MviInteractor
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchAction
+import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchAction.AddToFavoriteAction
+import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchAction.LoadCountriesByNameAction
+import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchAction.RemoveFromFavoriteAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult
+import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult.AddToFavoriteResult
+import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult.LoadCountriesByNameResult
+import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult.RemoveFromFavoriteResult
 import com.strv.ktools.logD
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -19,16 +25,16 @@ class CountrySearchInteractor(val countryRepository: CountryRepository) : MviInt
 		ObservableTransformer<CountrySearchAction, CountrySearchResult> { actions ->
 			actions.publish { selector ->
 				Observable.merge(
-					selector.ofType(CountrySearchAction.LoadCountriesByNameAction::class.java)
+					selector.ofType(LoadCountriesByNameAction::class.java)
 						.compose(loadCountriesByName)
 						.doOnNext { result ->
 							logD("result: $result")
 						},
-					selector.ofType(CountrySearchAction.AddToFavoriteAction::class.java).compose(addToFavorite)
+					selector.ofType(AddToFavoriteAction::class.java).compose(addToFavorite)
 						.doOnNext { result ->
 							logD("result: $result")
 						},
-					selector.ofType(CountrySearchAction.RemoveFromFavoriteAction::class.java).compose(removeFromFavorite)
+					selector.ofType(RemoveFromFavoriteAction::class.java).compose(removeFromFavorite)
 						.doOnNext { result ->
 							logD("result: $result")
 						}
@@ -37,30 +43,30 @@ class CountrySearchInteractor(val countryRepository: CountryRepository) : MviInt
 		}
 
 	private val loadCountriesByName =
-		ObservableTransformer<CountrySearchAction.LoadCountriesByNameAction, CountrySearchResult> { actions ->
+		ObservableTransformer<LoadCountriesByNameAction, CountrySearchResult> { actions ->
 			actions.flatMap { action ->
 				if (action.searchQuery.isBlank()) {
-					Observable.just(CountrySearchResult.LoadCountriesByNameResult.NotStarted)
+					Observable.just(LoadCountriesByNameResult.NotStarted)
 				} else {
 					countryRepository.getCountriesByName(action.searchQuery)
 						.toObservable()
-						.map { countries -> CountrySearchResult.LoadCountriesByNameResult.Success(countries) }
-						.cast(CountrySearchResult.LoadCountriesByNameResult::class.java)
+						.map { countries -> LoadCountriesByNameResult.Success(countries) }
+						.cast(LoadCountriesByNameResult::class.java)
 						.onErrorReturn { error ->
 							//because in case of empty result api returns 404 :(
 							if (error is HttpException && error.code() == 404) {
-								CountrySearchResult.LoadCountriesByNameResult.Success(emptyList())
-							} else CountrySearchResult.LoadCountriesByNameResult.Failure(error)
+								LoadCountriesByNameResult.Success(emptyList())
+							} else LoadCountriesByNameResult.Failure(error)
 						}
 						.subscribeOn(Schedulers.io())
 						.observeOn(AndroidSchedulers.mainThread())
-						.startWith(CountrySearchResult.LoadCountriesByNameResult.InProgress(action.searchQuery))
+						.startWith(LoadCountriesByNameResult.InProgress(action.searchQuery))
 				}
 			}
 		}
 
 	private val addToFavorite =
-		ObservableTransformer<CountrySearchAction.AddToFavoriteAction, CountrySearchResult> { actions ->
+		ObservableTransformer<AddToFavoriteAction, CountrySearchResult> { actions ->
 			actions.flatMap { action ->
 				Completable.fromAction {
 					countryRepository.addToFavorite(action.countryName)
@@ -69,19 +75,19 @@ class CountrySearchInteractor(val countryRepository: CountryRepository) : MviInt
 						// Emit two events to allow the UI notification to be hidden after
 						// some delay
 						pairWithDelay(
-							CountrySearchResult.AddToFavoriteResult.Success,
-							CountrySearchResult.AddToFavoriteResult.Reset)
+							AddToFavoriteResult.Success,
+							AddToFavoriteResult.Reset)
 					)
 					.cast(CountrySearchResult::class.java)
-					.onErrorReturn { CountrySearchResult.AddToFavoriteResult.Failure(it) }
+					.onErrorReturn { AddToFavoriteResult.Failure(it) }
 					.subscribeOn(Schedulers.io())
 					.observeOn(AndroidSchedulers.mainThread())
-					.startWith(CountrySearchResult.AddToFavoriteResult.InProgress)
+					.startWith(AddToFavoriteResult.InProgress)
 			}
 		}
 
 	private val removeFromFavorite =
-		ObservableTransformer<CountrySearchAction.RemoveFromFavoriteAction, CountrySearchResult> { actions ->
+		ObservableTransformer<RemoveFromFavoriteAction, CountrySearchResult> { actions ->
 			actions.flatMap { action ->
 				Completable.fromAction {
 					countryRepository.removeFromFavorite(action.countryName)
@@ -90,14 +96,14 @@ class CountrySearchInteractor(val countryRepository: CountryRepository) : MviInt
 						// Emit two events to allow the UI notification to be hidden after
 						// some delay
 						pairWithDelay(
-							CountrySearchResult.RemoveFromFavoriteResult.Success,
-							CountrySearchResult.RemoveFromFavoriteResult.Reset)
+							RemoveFromFavoriteResult.Success,
+							RemoveFromFavoriteResult.Reset)
 					)
 					.cast(CountrySearchResult::class.java)
-					.onErrorReturn { CountrySearchResult.RemoveFromFavoriteResult.Failure(it) }
+					.onErrorReturn { RemoveFromFavoriteResult.Failure(it) }
 					.subscribeOn(Schedulers.io())
 					.observeOn(AndroidSchedulers.mainThread())
-					.startWith(CountrySearchResult.RemoveFromFavoriteResult.InProgress)
+					.startWith(RemoveFromFavoriteResult.InProgress)
 			}
 		}
 }

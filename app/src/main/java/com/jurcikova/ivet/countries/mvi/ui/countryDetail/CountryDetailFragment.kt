@@ -41,7 +41,7 @@ class CountryDetailFragment
 					}
 				)
 			}
-		}.take(1)
+		}
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
