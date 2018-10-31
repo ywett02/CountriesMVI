@@ -63,7 +63,7 @@ class CountryListFragment
 			}
 		}
 
-		viewModel.statesLiveData2.observe(this, Observer { state ->
+		viewModel.statesLiveData.observe(this, Observer { state ->
 			logD("state: $state")
 
 			render(state!!)

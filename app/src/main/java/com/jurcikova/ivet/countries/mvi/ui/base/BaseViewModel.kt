@@ -29,7 +29,6 @@ abstract class BaseViewModel<I : MviIntent, A : MviAction, R : MviResult, S : Mv
 	 * This is basically used to keep ongoing events and the last cached State alive
 	 * while the UI disconnects and reconnects on config changes.
 	 */
-	protected val intentsSubject: PublishSubject<I> = create()
 	protected val actionsSubject: PublishSubject<A> = create()
 
 	/**

@@ -89,49 +89,25 @@ class CountryListViewModel(
 	}
 
 	override val statesLiveData: LiveData<CountryListViewState> =
-		LiveDataReactiveStreams.fromPublisher(intentsSubject
-			.map(this::actionFromIntent)
-			.doOnNext { action ->
-				logD("action: $action")
-			}
-			.compose(countryListInteractor.actionProcessor)
-			// Cache each state and pass it to the reducer to create a new state from
-			// the previous cached one and the latest Result emitted from the action processor.
-			// The Scan operator is used here for the caching.
-			.scan(CountryListViewState.idle(), reducer)
-			// When a reducer just emits previousState, there's no reason to call render. In fact,
-			// redrawing the UI in cases like this can cause jank (e.g. messing up snackbar animations
-			// by showing the same snackbar twice in rapid succession).
-			.distinctUntilChanged()
-			// Emit the last one event of the stream on subscription
-			// Useful when a View rebinds to the ViewModel after rotation.
-			.replay(1)
-			// Create the stream on creation without waiting for anyone to subscribe
-			// This allows the stream to stay alive even when the UI disconnects and
-			// match the stream's lifecycle to the ViewModel's one.
-			.autoConnect(0)
-			.toFlowable(BackpressureStrategy.BUFFER))
-
-	val statesLiveData2: LiveData<CountryListViewState> =
-		LiveDataReactiveStreams.fromPublisher(actionsSubject
-
-			.compose(countryListInteractor.actionProcessor)
-			// Cache each state and pass it to the reducer to create a new state from
-			// the previous cached one and the latest Result emitted from the action processor.
-			// The Scan operator is used here for the caching.
-			.scan(CountryListViewState.idle(), reducer)
-			// When a reducer just emits previousState, there's no reason to call render. In fact,
-			// redrawing the UI in cases like this can cause jank (e.g. messing up snackbar animations
-			// by showing the same snackbar twice in rapid succession).
-			.distinctUntilChanged()
-			// Emit the last one event of the stream on subscription
-			// Useful when a View rebinds to the ViewModel after rotation.
-			.replay(1)
-			// Create the stream on creation without waiting for anyone to subscribe
-			// This allows the stream to stay alive even when the UI disconnects and
-			// match the stream's lifecycle to the ViewModel's one.
-			.autoConnect(0)
-			.toFlowable(BackpressureStrategy.BUFFER))
+		LiveDataReactiveStreams.fromPublisher(
+			actionsSubject
+				.compose(countryListInteractor.actionProcessor)
+				// Cache each state and pass it to the reducer to create a new state from
+				// the previous cached one and the latest Result emitted from the action processor.
+				// The Scan operator is used here for the caching.
+				.scan(CountryListViewState.idle(), reducer)
+				// When a reducer just emits previousState, there's no reason to call render. In fact,
+				// redrawing the UI in cases like this can cause jank (e.g. messing up snackbar animations
+				// by showing the same snackbar twice in rapid succession).
+				.distinctUntilChanged()
+				// Emit the last one event of the stream on subscription
+				// Useful when a View rebinds to the ViewModel after rotation.
+				.replay(1)
+				// Create the stream on creation without waiting for anyone to subscribe
+				// This allows the stream to stay alive even when the UI disconnects and
+				// match the stream's lifecycle to the ViewModel's one.
+				.autoConnect(0)
+				.toFlowable(BackpressureStrategy.BUFFER))
 
 	init {
 		disposable.add(startDbStream())
