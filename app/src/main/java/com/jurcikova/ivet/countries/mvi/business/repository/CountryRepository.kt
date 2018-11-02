@@ -14,10 +14,12 @@ interface CountryRepository {
 
 class CountryRepositoryImpl(val countryService: CountryApi) : CountryRepository {
 
-	override suspend fun getCountry(countryName: String?): Country = countryService.getCountriesByName(countryName).await().first()
+	override suspend fun getCountry(countryName: String?): Country =
+		countryService.getCountriesByName(countryName).await().first()
 
 	override suspend fun getAllCountries(): List<Country> =
 		countryService.getAllCountries().await()
 
-	override suspend fun getCountriesByName(searchQuery: String): List<Country> = countryService.getCountriesByName(searchQuery).await()
+	override suspend fun getCountriesByName(searchQuery: String): List<Country> =
+		countryService.getCountriesByName(searchQuery).await()
 }
