@@ -5,14 +5,14 @@ import com.jurcikova.ivet.countries.mvi.business.db.dao.CountryDao
 import com.jurcikova.ivet.countries.mvi.business.entity.Country
 import com.strv.ktools.logD
 import io.reactivex.Completable
-import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.Single
 
 interface CountryRepository {
 
 	fun loadCountries(): Completable
 
-	fun getCountries(): Flowable<List<Country>>
+	fun getCountries(): Observable<List<Country>>
 
 	fun addToFavorite(countryName: String)
 
@@ -32,9 +32,10 @@ class CountryRepositoryImpl(private val countryService: CountryApi, private val 
 				storeCountriesInDb(countries)
 			}.ignoreElement()
 
-	override fun getCountries(): Flowable<List<Country>> =
+	override fun getCountries(): Observable<List<Country>> =
 		countryDao.getAll()
 			.doOnNext { logD("Dispatching ${it.size} from DB...") }
+			.toObservable()
 
 	override fun addToFavorite(countryName: String) {
 		countryDao.updateIsFavorite(countryName, true)

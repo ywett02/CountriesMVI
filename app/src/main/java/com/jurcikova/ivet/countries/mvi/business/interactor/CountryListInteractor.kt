@@ -21,6 +21,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 class CountryListInteractor(val countryRepository: CountryRepository) : MviInteractor<CountryListAction, CountryListResult> {
+
 	override val actionProcessor =
 		ObservableTransformer<CountryListAction, CountryListResult> { actions ->
 			actions.publish { selector ->

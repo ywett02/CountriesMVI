@@ -19,14 +19,14 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 
-class CountryDetailViewModel(private val countryDetailInteractor: CountryDetailInteractor) : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
+class CountryDetailViewModel(countryDetailInteractor: CountryDetailInteractor) : BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
 
 	override val reducer = BiFunction { previousState: CountryDetailViewState, result: CountryDetailResult ->
 		when (result) {
 			is LoadCountryDetailResult -> when (result) {
 				is LoadCountryDetailResult.Success -> previousState.copy(isLoading = false, country = result.country, initial = false)
 				is LoadCountryDetailResult.Failure -> previousState.copy(isLoading = false, error = result.error, initial = false)
-				is LoadCountryDetailResult.InProgress -> previousState.copy(isLoading = true)
+				is LoadCountryDetailResult.InProgress -> previousState.copy(isLoading = true, initial = false)
 			}
 			is AddToFavoriteResult -> when (result) {
 				is AddToFavoriteResult.Success -> previousState.copy(isLoading = false, country = previousState.country.also { it?.isFavorite = true }, message = MessageType.AddToFavorite, error = null)
@@ -45,7 +45,11 @@ class CountryDetailViewModel(private val countryDetailInteractor: CountryDetailI
 
 	override val statesLiveData: LiveData<CountryDetailViewState> =
 		LiveDataReactiveStreams.fromPublisher(
-			actionsSubject
+			intentsSubject
+				.map(this::actionFromIntent)
+				.doOnNext { action ->
+					logD("action: $action")
+				}
 				.compose(countryDetailInteractor.actionProcessor)
 				// Cache each state and pass it to the reducer to create a new state from
 				// the previous cached one and the latest Result emitted from the action processor.
@@ -68,11 +72,8 @@ class CountryDetailViewModel(private val countryDetailInteractor: CountryDetailI
 		intents
 			.doOnNext { intent ->
 				logD("intent: $intent")
-			}.map(this::actionFromIntent)
-			.doOnNext { action ->
-				logD("action: $action")
 			}
-			.subscribe(actionsSubject)
+			.subscribe(intentsSubject)
 
 	override fun actionFromIntent(intent: CountryDetailIntent): CountryDetailAction =
 		when (intent) {

@@ -70,7 +70,11 @@ class CountrySearchViewModel(
 
 	override val statesLiveData: LiveData<CountrySearchViewState> =
 		LiveDataReactiveStreams.fromPublisher(
-			actionsSubject
+			intentsSubject
+				.map(this::actionFromIntent)
+				.doOnNext { action ->
+					logD("action: $action")
+				}
 				//gate to the business logic
 				.compose(countrySearchInteractor.actionProcessor)
 				.scan(CountrySearchViewState.idle(), reducer)
@@ -83,11 +87,8 @@ class CountrySearchViewModel(
 		intents
 			.doOnNext { intent ->
 				logD("intent: $intent")
-			}.map(this::actionFromIntent)
-			.doOnNext { action ->
-				logD("action: $action")
 			}
-			.subscribe(actionsSubject)
+			.subscribe(intentsSubject)
 
 	override fun actionFromIntent(intent: CountrySearchIntent): CountrySearchAction =
 		when (intent) {

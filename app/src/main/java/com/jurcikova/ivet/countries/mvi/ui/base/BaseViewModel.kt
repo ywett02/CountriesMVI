@@ -6,14 +6,11 @@ import com.jurcikova.ivet.countries.mvi.mvibase.MviIntent
 import com.jurcikova.ivet.countries.mvi.mvibase.MviResult
 import com.jurcikova.ivet.countries.mvi.mvibase.MviViewModel
 import com.jurcikova.ivet.countries.mvi.mvibase.MviViewState
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.PublishSubject.create
 
 abstract class BaseViewModel<I : MviIntent, A : MviAction, R : MviResult, S : MviViewState> : ViewModel(), MviViewModel<I, S> {
-
-	val disposable = CompositeDisposable()
 
 	/**
 	 * The Reducer is where [MviViewState], that the [MviView] will use to
@@ -29,15 +26,11 @@ abstract class BaseViewModel<I : MviIntent, A : MviAction, R : MviResult, S : Mv
 	 * This is basically used to keep ongoing events and the last cached State alive
 	 * while the UI disconnects and reconnects on config changes.
 	 */
-	protected val actionsSubject: PublishSubject<A> = create()
+	protected val intentsSubject: PublishSubject<I> = create()
 
 	/**
 	 * Translate an [MviIntent] to an [MviAction].
 	 * Used to decouple the UI and the business logic to allow easy testings and reusability.
 	 */
 	protected abstract fun actionFromIntent(intent: I): A
-
-	override fun onCleared() {
-		disposable.dispose()
-	}
 }

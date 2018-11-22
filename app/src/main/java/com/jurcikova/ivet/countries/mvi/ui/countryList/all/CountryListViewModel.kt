@@ -48,7 +48,7 @@ class CountryListViewModel(
 					is LoadCountriesResult.InProgress -> {
 						if (result.isRefreshing) {
 							previousState.copy(isLoading = false, isRefreshing = true)
-						} else previousState.copy(isLoading = true, isRefreshing = false)
+						} else previousState.copy(isLoading = true, isRefreshing = false, initial = false)
 					}
 				}
 
@@ -90,7 +90,16 @@ class CountryListViewModel(
 
 	override val statesLiveData: LiveData<CountryListViewState> =
 		LiveDataReactiveStreams.fromPublisher(
-			actionsSubject
+			intentsSubject
+				.doOnNext { intent ->
+					logD("intent: $intent")
+				}
+				.map(this::actionFromIntent)
+				//observe app state - database
+				.mergeWith(countryListInteractor.countryRepository.getCountries().map { UpdateCountryListAction(it) })
+				.doOnNext { action ->
+					logD("action: $action")
+				}
 				.compose(countryListInteractor.actionProcessor)
 				// Cache each state and pass it to the reducer to create a new state from
 				// the previous cached one and the latest Result emitted from the action processor.
@@ -109,20 +118,12 @@ class CountryListViewModel(
 				.autoConnect(0)
 				.toFlowable(BackpressureStrategy.BUFFER))
 
-	init {
-		disposable.add(startDbStream())
-	}
-
 	override fun processIntents(intents: Observable<CountryListIntent>) =
 		intents
 			.doOnNext { intent ->
 				logD("intent: $intent")
 			}
-			.map(this::actionFromIntent)
-			.doOnNext { action ->
-				logD("action: $action")
-			}
-			.subscribe(actionsSubject)
+			.subscribe(intentsSubject)
 
 	override fun actionFromIntent(intent: CountryListIntent): CountryListAction =
 		when (intent) {
@@ -135,13 +136,4 @@ class CountryListViewModel(
 
 	private fun applyFilters(countries: List<Country>, filterType: FilterType): List<Country> =
 		if (filterType == FilterType.Favorite) countries.filter { it.isFavorite } else countries
-
-	private fun startDbStream() =
-		countryListInteractor.countryRepository.getCountries()
-			.map {
-				UpdateCountryListAction(it)
-			}
-			.subscribe {
-				actionsSubject.onNext(it)
-			}
 }
