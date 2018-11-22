@@ -6,15 +6,18 @@ import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchActio
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchIntent.SearchIntent
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult.LoadCountriesByNameResult
 import com.strv.ktools.logD
-import kotlinx.coroutines.experimental.CoroutineScope
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.experimental.channels.consumeEach
-import kotlinx.coroutines.experimental.channels.flatMap
-import kotlinx.coroutines.experimental.channels.map
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.flatMap
+import kotlinx.coroutines.channels.map
 
 class CountrySearchViewModel(private val countrySearchInteractor: CountrySearchInteractor) : BaseViewModel<CountrySearchIntent, CountrySearchAction, CountrySearchResult, CountrySearchViewState>() {
 
+	@ExperimentalCoroutinesApi
 	override val state: ConflatedBroadcastChannel<CountrySearchViewState> = ConflatedBroadcastChannel(CountrySearchViewState.idle())
 
 	override val reduce =
@@ -45,6 +48,8 @@ class CountrySearchViewModel(private val countrySearchInteractor: CountrySearchI
 			}
 		}
 
+	@ExperimentalCoroutinesApi
+	@ObsoleteCoroutinesApi
 	override suspend fun CoroutineScope.processIntents(channel: Channel<CountrySearchIntent>) = state.run {
 		channel
 			.map { intent ->

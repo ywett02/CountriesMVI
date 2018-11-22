@@ -3,12 +3,16 @@ package com.jurcikova.ivet.countries.mvi.ui.countryDetail
 import android.os.Bundle
 import com.jurcikova.ivet.countries.mvi.common.setOnClick
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
-import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailIntent.*
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailIntent.AddToFavoriteIntent
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailIntent.InitialIntent
+import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailIntent.RemoveFromFavoriteIntent
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountryDetailBinding
 import com.strv.ktools.logD
-import kotlinx.coroutines.experimental.channels.consume
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, CountryDetailIntent, CountryDetailViewState>(R.layout.fragment_country_detail) {
@@ -19,15 +23,15 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
 
 	private val viewModel: CountryDetailViewModel by viewModel()
 
+	@ExperimentalCoroutinesApi
+	@ObsoleteCoroutinesApi
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
 		launch {
-			viewModel.state.consume {
-				for (state in this) {
+			viewModel.state.consumeEach { state ->
 					logD("state: $state")
 					render(state)
-				}
 			}
 		}
 
@@ -37,6 +41,7 @@ class CountryDetailFragment : BaseFragment<FragmentCountryDetailBinding, Country
 	override fun startStream() =
 		launch { viewModel.run { processIntents(intents) } }
 
+	@ExperimentalCoroutinesApi
 	override fun setupIntents() {
 		binding.fabAdd.setOnClick(this) {
 			viewModel.state.value.let {

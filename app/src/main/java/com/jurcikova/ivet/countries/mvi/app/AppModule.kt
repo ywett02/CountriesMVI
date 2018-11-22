@@ -1,6 +1,6 @@
 package com.jurcikova.ivet.countries.mvi.app
 
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.jurcikova.ivet.countries.mvi.business.api.CountryApi
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryDetailInteractor
 import com.jurcikova.ivet.countries.mvi.business.interactor.CountryListInteractor

@@ -1,7 +1,7 @@
 package com.jurcikova.ivet.countries.mvi.mvibase
 
-import kotlinx.coroutines.experimental.CoroutineScope
-import kotlinx.coroutines.experimental.channels.ReceiveChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.ReceiveChannel
 
 interface MviInteractor<A : MviAction, R : MviResult> {
 

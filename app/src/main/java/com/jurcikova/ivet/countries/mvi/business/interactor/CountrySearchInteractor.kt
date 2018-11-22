@@ -4,14 +4,16 @@ import com.jurcikova.ivet.countries.mvi.business.repository.CountryRepository
 import com.jurcikova.ivet.countries.mvi.mvibase.MviInteractor
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchAction
 import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchResult
-import kotlinx.coroutines.experimental.CoroutineScope
-import kotlinx.coroutines.experimental.channels.ProducerScope
-import kotlinx.coroutines.experimental.channels.ReceiveChannel
-import kotlinx.coroutines.experimental.channels.produce
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
 import retrofit2.HttpException
 
 class CountrySearchInteractor(val countryRepository: CountryRepository) : MviInteractor<CountrySearchAction, CountrySearchResult> {
 
+	@ExperimentalCoroutinesApi
 	override fun CoroutineScope.processAction(action: CountrySearchAction): ReceiveChannel<CountrySearchResult> =
 		produce {
 			when (action) {
@@ -21,6 +23,7 @@ class CountrySearchInteractor(val countryRepository: CountryRepository) : MviInt
 			}
 		}
 
+	@ExperimentalCoroutinesApi
 	private suspend fun ProducerScope<CountrySearchResult>.produceSearchCountriesResult(query: String) {
 		if (query.isBlank()) {
 			send(CountrySearchResult.LoadCountriesByNameResult.NotStarted)

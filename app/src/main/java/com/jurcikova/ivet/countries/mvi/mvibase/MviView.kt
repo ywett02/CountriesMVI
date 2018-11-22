@@ -1,6 +1,6 @@
 package com.jurcikova.ivet.countries.mvi.mvibase
 
-import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.channels.Channel
 
 /**
  * Object representing a UI that will

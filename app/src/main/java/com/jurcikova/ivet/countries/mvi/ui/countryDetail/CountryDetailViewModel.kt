@@ -12,16 +12,19 @@ import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailResult.Add
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailResult.LoadCountryDetailResult
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailResult.RemoveFromFavoriteResult
 import com.strv.ktools.logD
-import kotlinx.coroutines.experimental.CoroutineScope
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.experimental.channels.consumeEach
-import kotlinx.coroutines.experimental.channels.flatMap
-import kotlinx.coroutines.experimental.channels.map
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.flatMap
+import kotlinx.coroutines.channels.map
 
 class CountryDetailViewModel(val countryDetailInteractor: CountryDetailInteractor)
 	: BaseViewModel<CountryDetailIntent, CountryDetailAction, CountryDetailResult, CountryDetailViewState>() {
 
+	@ExperimentalCoroutinesApi
 	override val state = ConflatedBroadcastChannel(CountryDetailViewState.idle())
 
 	override val reduce =
@@ -47,6 +50,8 @@ class CountryDetailViewModel(val countryDetailInteractor: CountryDetailInteracto
 			}
 		}
 
+	@ObsoleteCoroutinesApi
+	@ExperimentalCoroutinesApi
 	override suspend fun CoroutineScope.processIntents(channel: Channel<CountryDetailIntent>) =
 		state.run {
 			channel

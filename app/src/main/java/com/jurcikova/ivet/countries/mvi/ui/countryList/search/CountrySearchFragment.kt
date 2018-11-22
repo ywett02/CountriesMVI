@@ -10,14 +10,15 @@ import com.jurcikova.ivet.countries.mvi.common.navigate
 import com.jurcikova.ivet.countries.mvi.ui.BaseFragment
 import com.jurcikova.ivet.countries.mvi.ui.countryDetail.CountryDetailFragment.Companion.countryName
 import com.jurcikova.ivet.countries.mvi.ui.countryList.CountryAdapter
-import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchIntent.*
+import com.jurcikova.ivet.countries.mvi.ui.countryList.search.CountrySearchIntent.SearchIntent
 import com.jurcikova.ivet.mvi.R
 import com.jurcikova.ivet.mvi.databinding.FragmentCountrySearchBinding
 import com.strv.ktools.logD
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.channels.consume
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, CountrySearchIntent, CountrySearchViewState>(R.layout.fragment_country_search) {
@@ -30,15 +31,14 @@ class CountrySearchFragment : BaseFragment<FragmentCountrySearchBinding, Country
 		}
 	})
 
+	@ObsoleteCoroutinesApi
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
 		launch {
-			viewModel.state.consume {
-				for (state in this) {
-					logD("state: $state")
-					render(state)
-				}
+			viewModel.state.consumeEach { state ->
+				logD("state: $state")
+				render(state)
 			}
 		}
 

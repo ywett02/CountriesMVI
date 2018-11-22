@@ -1,8 +1,9 @@
 package com.jurcikova.ivet.countries.mvi.mvibase
 
-import kotlinx.coroutines.experimental.CoroutineScope
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 
 /**
  * Object that will subscribes to a [MviView]'s [MviIntent]s,
@@ -14,6 +15,7 @@ import kotlinx.coroutines.experimental.channels.ConflatedBroadcastChannel
  */
 interface MviViewModel<I : MviIntent, S : MviViewState> {
 
+	@ExperimentalCoroutinesApi
 	val state: ConflatedBroadcastChannel<S>
 
 	suspend fun CoroutineScope.processIntents(channel: Channel<I>)

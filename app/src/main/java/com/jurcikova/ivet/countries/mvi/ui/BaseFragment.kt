@@ -13,11 +13,11 @@ import com.jurcikova.ivet.countries.mvi.common.AndroidJob
 import com.jurcikova.ivet.countries.mvi.mvibase.MviIntent
 import com.jurcikova.ivet.countries.mvi.mvibase.MviView
 import com.jurcikova.ivet.countries.mvi.mvibase.MviViewState
-import kotlinx.coroutines.experimental.CoroutineScope
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlin.coroutines.CoroutineContext
 
 abstract class BaseFragment<VB : ViewDataBinding, I : MviIntent, S : MviViewState>(
 	@LayoutRes val layoutRes: Int
